@@ -13,3 +13,6 @@ A Streamlit-based scenario model for comparing vineyard production budgets with 
 
 ```bash
 streamlit run s7.py
+
+## Author
+Riekie Cloete — Jerry Analytics
