@@ -1,0 +1,661 @@
+﻿YEAR,Wine Class,Grape Variety,Region,Band,Income_R_per_t
+2024,White,Bukettraube,BREEDEKLOOF   ,Low ,6125
+2024,White,Crouchen,BREEDEKLOOF   ,Low ,6125
+2024,White,Chardonnay,BREEDEKLOOF   ,Low ,8500
+2024,White,Chenin Blanc,BREEDEKLOOF   ,Low ,4399
+2024,White,Clairette blanche,BREEDEKLOOF   ,Low ,6125
+2024,White,Colombar,BREEDEKLOOF   ,Low ,4399
+2024,White,Palomino,BREEDEKLOOF   ,Low ,6125
+2024,White,Gewurztraminer,BREEDEKLOOF   ,Low ,6125
+2024,White,Muscat d'Alexandrie,BREEDEKLOOF   ,Low ,6000
+2024,White,Muscat de Frontignan,BREEDEKLOOF   ,Low ,6125
+2024,White,Pinot gris,BREEDEKLOOF   ,Low ,5710
+2024,White,Sauvignon blanc,BREEDEKLOOF   ,Low ,6364
+2024,White,Sémillon,BREEDEKLOOF   ,Low ,7114
+2024,White,Viognier,BREEDEKLOOF   ,Low ,6300
+2024,White,Riesling,BREEDEKLOOF   ,Low ,4399
+2024,White,Other White,BREEDEKLOOF   ,Low ,6125
+2024,Red,Cabernet Franc,BREEDEKLOOF   ,Low ,5710
+2024,Red,Cabernet Sauvignon,BREEDEKLOOF   ,Low ,10450
+2024,Red,Carignan,BREEDEKLOOF   ,Low ,5710
+2024,Red,Cinsaut,BREEDEKLOOF   ,Low ,5500
+2024,Red,Gamay noir,BREEDEKLOOF   ,Low ,6364
+2024,Red,Merlot,BREEDEKLOOF   ,Low ,9650
+2024,Red,Petit Verdot,BREEDEKLOOF   ,Low ,8407
+2024,Red,Pinot noir,BREEDEKLOOF   ,Low ,8121
+2024,Red,Pinotage,BREEDEKLOOF   ,Low ,5710
+2024,Red,Roobernet,BREEDEKLOOF   ,Low ,6364
+2024,Red,Ruby Cabernet,BREEDEKLOOF   ,Low ,4400
+2024,Red,Shiraz,BREEDEKLOOF   ,Low ,8816
+2024,Red,Tinta Barocca,BREEDEKLOOF   ,Low ,3745
+2024,Red,Other Red,BREEDEKLOOF   ,Low ,6364
+2024,White,Bukettraube,BREEDEKLOOF   ,High,7113
+2024,White,Crouchen,BREEDEKLOOF   ,High,7113
+2024,White,Chardonnay,BREEDEKLOOF   ,High,9078
+2024,White,Chenin Blanc,BREEDEKLOOF   ,High,6726
+2024,White,Clairette blanche,BREEDEKLOOF   ,High,7113
+2024,White,Colombar,BREEDEKLOOF   ,High,8000
+2024,White,Palomino,BREEDEKLOOF   ,High,7113
+2024,White,Gewurztraminer,BREEDEKLOOF   ,High,7113
+2024,White,Muscat d'Alexandrie,BREEDEKLOOF   ,High,6364
+2024,White,Muscat de Frontignan,BREEDEKLOOF   ,High,7113
+2024,White,Pinot gris,BREEDEKLOOF   ,High,6364
+2024,White,Sauvignon blanc,BREEDEKLOOF   ,High,8722
+2024,White,Sémillon,BREEDEKLOOF   ,High,9078
+2024,White,Viognier,BREEDEKLOOF   ,High,6364
+2024,White,Riesling,BREEDEKLOOF   ,High,11700
+2024,White,Other White,BREEDEKLOOF   ,High,7113
+2024,Red,Cabernet Franc,BREEDEKLOOF   ,High,6364
+2024,Red,Cabernet Sauvignon,BREEDEKLOOF   ,High,11043
+2024,Red,Carignan,BREEDEKLOOF   ,High,6364
+2024,Red,Cinsaut,BREEDEKLOOF   ,High,5709
+2024,Red,Gamay noir,BREEDEKLOOF   ,High,7475
+2024,Red,Merlot,BREEDEKLOOF   ,High,9733
+2024,Red,Petit Verdot,BREEDEKLOOF   ,High,8423
+2024,Red,Pinot noir,BREEDEKLOOF   ,High,10388
+2024,Red,Pinotage,BREEDEKLOOF   ,High,8786
+2024,Red,Roobernet,BREEDEKLOOF   ,High,7475
+2024,Red,Ruby Cabernet,BREEDEKLOOF   ,High,5054
+2024,Red,Shiraz,BREEDEKLOOF   ,High,9733
+2024,Red,Tinta Barocca,BREEDEKLOOF   ,High,4399
+2024,Red,Other Red,BREEDEKLOOF   ,High,7475
+2024,White,Bukettraube,ROBERTSON     ,Low ,5055
+2024,White,Crouchen,ROBERTSON     ,Low ,5055
+2024,White,Chardonnay,ROBERTSON     ,Low ,8213
+2024,White,Chenin Blanc,ROBERTSON     ,Low ,4002
+2024,White,Clairette blanche,ROBERTSON     ,Low ,5055
+2024,White,Colombar,ROBERTSON     ,Low ,4000
+2024,White,Palomino,ROBERTSON     ,Low ,5055
+2024,White,Gewurztraminer,ROBERTSON     ,Low ,5055
+2024,White,Muscat d'Alexandrie,ROBERTSON     ,Low ,5710
+2024,White,Muscat de Frontignan,ROBERTSON     ,Low ,5500
+2024,White,Pinot gris,ROBERTSON     ,Low ,5710
+2024,White,Sauvignon blanc,ROBERTSON     ,Low ,5931
+2024,White,Sémillon,ROBERTSON     ,Low ,8500
+2024,White,Viognier,ROBERTSON     ,Low ,5000
+2024,White,Riesling,ROBERTSON     ,Low ,4399
+2024,White,Other White,ROBERTSON     ,Low ,5055
+2024,Red,Cabernet Franc,ROBERTSON     ,Low ,6040
+2024,Red,Cabernet Sauvignon,ROBERTSON     ,Low ,6364
+2024,Red,Carignan,ROBERTSON     ,Low ,5710
+2024,Red,Cinsaut,ROBERTSON     ,Low ,5055
+2024,Red,Gamay noir,ROBERTSON     ,Low ,5175
+2024,Red,Merlot,ROBERTSON     ,Low ,6000
+2024,Red,Petit Verdot,ROBERTSON     ,Low ,8423
+2024,Red,Pinot noir,ROBERTSON     ,Low ,6756
+2024,Red,Pinotage,ROBERTSON     ,Low ,5380
+2024,Red,Roobernet,ROBERTSON     ,Low ,5175
+2024,Red,Ruby Cabernet,ROBERTSON     ,Low ,5000
+2024,Red,Shiraz,ROBERTSON     ,Low ,6028
+2024,Red,Tinta Barocca,ROBERTSON     ,Low ,3745
+2024,Red,Other Red,ROBERTSON     ,Low ,5175
+2024,White,Bukettraube,ROBERTSON     ,High,7113
+2024,White,Crouchen,ROBERTSON     ,High,7113
+2024,White,Chardonnay,ROBERTSON     ,High,9078
+2024,White,Chenin Blanc,ROBERTSON     ,High,4399
+2024,White,Clairette blanche,ROBERTSON     ,High,7113
+2024,White,Colombar,ROBERTSON     ,High,4399
+2024,White,Palomino,ROBERTSON     ,High,7113
+2024,White,Gewurztraminer,ROBERTSON     ,High,7113
+2024,White,Muscat d'Alexandrie,ROBERTSON     ,High,6364
+2024,White,Muscat de Frontignan,ROBERTSON     ,High,7113
+2024,White,Pinot gris,ROBERTSON     ,High,6364
+2024,White,Sauvignon blanc,ROBERTSON     ,High,6364
+2024,White,Sémillon,ROBERTSON     ,High,9078
+2024,White,Viognier,ROBERTSON     ,High,6364
+2024,White,Riesling,ROBERTSON     ,High,11700
+2024,White,Other White,ROBERTSON     ,High,7113
+2024,Red,Cabernet Franc,ROBERTSON     ,High,6364
+2024,Red,Cabernet Sauvignon,ROBERTSON     ,High,11043
+2024,Red,Carignan,ROBERTSON     ,High,6364
+2024,Red,Cinsaut,ROBERTSON     ,High,5709
+2024,Red,Gamay noir,ROBERTSON     ,High,6364
+2024,Red,Merlot,ROBERTSON     ,High,9733
+2024,Red,Petit Verdot,ROBERTSON     ,High,8500
+2024,Red,Pinot noir,ROBERTSON     ,High,10388
+2024,Red,Pinotage,ROBERTSON     ,High,6364
+2024,Red,Roobernet,ROBERTSON     ,High,6364
+2024,Red,Ruby Cabernet,ROBERTSON     ,High,5054
+2024,Red,Shiraz,ROBERTSON     ,High,9733
+2024,Red,Tinta Barocca,ROBERTSON     ,High,4399
+2024,Red,Other Red,ROBERTSON     ,High,6364
+2024,White,Bukettraube,WORCESTER     ,Low ,5055
+2024,White,Crouchen,WORCESTER     ,Low ,5055
+2024,White,Chardonnay,WORCESTER     ,Low ,7769
+2024,White,Chenin Blanc,WORCESTER     ,Low ,3745
+2024,White,Clairette blanche,WORCESTER     ,Low ,5055
+2024,White,Colombar,WORCESTER     ,Low ,3745
+2024,White,Palomino,WORCESTER     ,Low ,5055
+2024,White,Gewurztraminer,WORCESTER     ,Low ,5055
+2024,White,Muscat d'Alexandrie,WORCESTER     ,Low ,5710
+2024,White,Muscat de Frontignan,WORCESTER     ,Low ,5055
+2024,White,Pinot gris,WORCESTER     ,Low ,5710
+2024,White,Sauvignon blanc,WORCESTER     ,Low ,6364
+2024,White,Sémillon,WORCESTER     ,Low ,7114
+2024,White,Viognier,WORCESTER     ,Low ,5000
+2024,White,Riesling,WORCESTER     ,Low ,5553
+2024,White,Other White,WORCESTER     ,Low ,5055
+2024,Red,Cabernet Franc,WORCESTER     ,Low ,5710
+2024,Red,Cabernet Sauvignon,WORCESTER     ,Low ,5055
+2024,Red,Carignan,WORCESTER     ,Low ,5710
+2024,Red,Cinsaut,WORCESTER     ,Low ,5055
+2024,Red,Gamay noir,WORCESTER     ,Low ,6000
+2024,Red,Merlot,WORCESTER     ,Low ,5710
+2024,Red,Petit Verdot,WORCESTER     ,Low ,7769
+2024,Red,Pinot noir,WORCESTER     ,Low ,10388
+2024,Red,Pinotage,WORCESTER     ,Low ,5710
+2024,Red,Roobernet,WORCESTER     ,Low ,6000
+2024,Red,Ruby Cabernet,WORCESTER     ,Low ,4400
+2024,Red,Shiraz,WORCESTER     ,Low ,9733
+2024,Red,Tinta Barocca,WORCESTER     ,Low ,3745
+2024,Red,Other Red,WORCESTER     ,Low ,6000
+2024,White,Bukettraube,WORCESTER     ,High,7113
+2024,White,Crouchen,WORCESTER     ,High,7113
+2024,White,Chardonnay,WORCESTER     ,High,13580
+2024,White,Chenin Blanc,WORCESTER     ,High,4399
+2024,White,Clairette blanche,WORCESTER     ,High,7113
+2024,White,Colombar,WORCESTER     ,High,4399
+2024,White,Palomino,WORCESTER     ,High,7113
+2024,White,Gewurztraminer,WORCESTER     ,High,7113
+2024,White,Muscat d'Alexandrie,WORCESTER     ,High,6364
+2024,White,Muscat de Frontignan,WORCESTER     ,High,7113
+2024,White,Pinot gris,WORCESTER     ,High,6364
+2024,White,Sauvignon blanc,WORCESTER     ,High,10700
+2024,White,Sémillon,WORCESTER     ,High,9078
+2024,White,Viognier,WORCESTER     ,High,6364
+2024,White,Riesling,WORCESTER     ,High,11700
+2024,White,Other White,WORCESTER     ,High,7113
+2024,Red,Cabernet Franc,WORCESTER     ,High,6364
+2024,Red,Cabernet Sauvignon,WORCESTER     ,High,11043
+2024,Red,Carignan,WORCESTER     ,High,6364
+2024,Red,Cinsaut,WORCESTER     ,High,5709
+2024,Red,Gamay noir,WORCESTER     ,High,6364
+2024,Red,Merlot,WORCESTER     ,High,9733
+2024,Red,Petit Verdot,WORCESTER     ,High,8423
+2024,Red,Pinot noir,WORCESTER     ,High,17423
+2024,Red,Pinotage,WORCESTER     ,High,6364
+2024,Red,Roobernet,WORCESTER     ,High,6364
+2024,Red,Ruby Cabernet,WORCESTER     ,High,5054
+2024,Red,Shiraz,WORCESTER     ,High,12000
+2024,Red,Tinta Barocca,WORCESTER     ,High,4399
+2024,Red,Other Red,WORCESTER     ,High,6364
+2024,White,Bukettraube,OLIFANTSRIVER,Low ,2085
+2024,White,Crouchen,OLIFANTSRIVER,Low ,2085
+2024,White,Chardonnay,OLIFANTSRIVER,Low ,5055
+2024,White,Chenin Blanc,OLIFANTSRIVER,Low ,3744
+2024,White,Clairette blanche,OLIFANTSRIVER,Low ,3200
+2024,White,Colombar,OLIFANTSRIVER,Low ,3147
+2024,White,Palomino,OLIFANTSRIVER,Low ,5694
+2024,White,Gewurztraminer,OLIFANTSRIVER,Low ,2085
+2024,White,Muscat d'Alexandrie,OLIFANTSRIVER,Low ,4321
+2024,White,Muscat de Frontignan,OLIFANTSRIVER,Low ,5284
+2024,White,Pinot gris,OLIFANTSRIVER,Low ,5500
+2024,White,Sauvignon blanc,OLIFANTSRIVER,Low ,5054
+2024,White,Sémillon,OLIFANTSRIVER,Low ,5000
+2024,White,Viognier,OLIFANTSRIVER,Low ,4000
+2024,White,Riesling,OLIFANTSRIVER,Low ,2085
+2024,White,Other White,OLIFANTSRIVER,Low ,2085
+2024,Red,Cabernet Franc,OLIFANTSRIVER,Low ,6364
+2024,Red,Cabernet Sauvignon,OLIFANTSRIVER,Low ,5591
+2024,Red,Carignan,OLIFANTSRIVER,Low ,6000
+2024,Red,Cinsaut,OLIFANTSRIVER,Low ,6364
+2024,Red,Gamay noir,OLIFANTSRIVER,Low ,6364
+2024,Red,Merlot,OLIFANTSRIVER,Low ,5878
+2024,Red,Petit Verdot,OLIFANTSRIVER,Low ,6364
+2024,Red,Pinot noir,OLIFANTSRIVER,Low ,8000
+2024,Red,Pinotage,OLIFANTSRIVER,Low ,5380
+2024,Red,Roobernet,OLIFANTSRIVER,Low ,4872
+2024,Red,Ruby Cabernet,OLIFANTSRIVER,Low ,4448
+2024,Red,Shiraz,OLIFANTSRIVER,Low ,6103
+2024,Red,Tinta Barocca,OLIFANTSRIVER,Low ,4750
+2024,Red,Other Red,OLIFANTSRIVER,Low ,6364
+2024,White,Bukettraube,OLIFANTSRIVER,High,6600
+2024,White,Crouchen,OLIFANTSRIVER,High,6600
+2024,White,Chardonnay,OLIFANTSRIVER,High,7631
+2024,White,Chenin Blanc,OLIFANTSRIVER,High,4778
+2024,White,Clairette blanche,OLIFANTSRIVER,High,3744
+2024,White,Colombar,OLIFANTSRIVER,High,3744
+2024,White,Palomino,OLIFANTSRIVER,High,5709
+2024,White,Gewurztraminer,OLIFANTSRIVER,High,6600
+2024,White,Muscat d'Alexandrie,OLIFANTSRIVER,High,4399
+2024,White,Muscat de Frontignan,OLIFANTSRIVER,High,6600
+2024,White,Pinot gris,OLIFANTSRIVER,High,5709
+2024,White,Sauvignon blanc,OLIFANTSRIVER,High,5718
+2024,White,Sémillon,OLIFANTSRIVER,High,5054
+2024,White,Viognier,OLIFANTSRIVER,High,4399
+2024,White,Riesling,OLIFANTSRIVER,High,6600
+2024,White,Other White,OLIFANTSRIVER,High,6600
+2024,Red,Cabernet Franc,OLIFANTSRIVER,High,7282
+2024,Red,Cabernet Sauvignon,OLIFANTSRIVER,High,6364
+2024,Red,Carignan,OLIFANTSRIVER,High,6364
+2024,Red,Cinsaut,OLIFANTSRIVER,High,6544
+2024,Red,Gamay noir,OLIFANTSRIVER,High,7282
+2024,Red,Merlot,OLIFANTSRIVER,High,6364
+2024,Red,Petit Verdot,OLIFANTSRIVER,High,7282
+2024,Red,Pinot noir,OLIFANTSRIVER,High,8423
+2024,Red,Pinotage,OLIFANTSRIVER,High,6364
+2024,Red,Roobernet,OLIFANTSRIVER,High,5054
+2024,Red,Ruby Cabernet,OLIFANTSRIVER,High,5054
+2024,Red,Shiraz,OLIFANTSRIVER,High,6364
+2024,Red,Tinta Barocca,OLIFANTSRIVER,High,5054
+2024,Red,Other Red,OLIFANTSRIVER,High,7282
+2024,White,Bukettraube,NORTHERN CAPE,Low ,1850
+2024,White,Crouchen,NORTHERN CAPE,Low ,1850
+2024,White,Chardonnay,NORTHERN CAPE,Low ,6364
+2024,White,Chenin Blanc,NORTHERN CAPE,Low ,1850
+2024,White,Clairette blanche,NORTHERN CAPE,Low ,3089
+2024,White,Colombar,NORTHERN CAPE,Low ,1850
+2024,White,Palomino,NORTHERN CAPE,Low ,4400
+2024,White,Gewurztraminer,NORTHERN CAPE,Low ,1850
+2024,White,Muscat d'Alexandrie,NORTHERN CAPE,Low ,3089
+2024,White,Muscat de Frontignan,NORTHERN CAPE,Low ,1850
+2024,White,Pinot gris,NORTHERN CAPE,Low ,5055
+2024,White,Sauvignon blanc,NORTHERN CAPE,Low ,4400
+2024,White,Sémillon,NORTHERN CAPE,Low ,4400
+2024,White,Viognier,NORTHERN CAPE,Low ,3745
+2024,White,Riesling,NORTHERN CAPE,Low ,1850
+2024,White,Other White,NORTHERN CAPE,Low ,1850
+2024,Red,Cabernet Franc,NORTHERN CAPE,Low ,5055
+2024,Red,Cabernet Sauvignon,NORTHERN CAPE,Low ,4400
+2024,Red,Carignan,NORTHERN CAPE,Low ,5710
+2024,Red,Cinsaut,NORTHERN CAPE,Low ,5710
+2024,Red,Gamay noir,NORTHERN CAPE,Low ,5055
+2024,Red,Merlot,NORTHERN CAPE,Low ,5710
+2024,Red,Petit Verdot,NORTHERN CAPE,Low ,5055
+2024,Red,Pinot noir,NORTHERN CAPE,Low ,7769
+2024,Red,Pinotage,NORTHERN CAPE,Low ,5055
+2024,Red,Roobernet,NORTHERN CAPE,Low ,4400
+2024,Red,Ruby Cabernet,NORTHERN CAPE,Low ,3754
+2024,Red,Shiraz,NORTHERN CAPE,Low ,6364
+2024,Red,Tinta Barocca,NORTHERN CAPE,Low ,4400
+2024,Red,Other Red,NORTHERN CAPE,Low ,5055
+2024,White,Bukettraube,NORTHERN CAPE,High,2085
+2024,White,Crouchen,NORTHERN CAPE,High,2085
+2024,White,Chardonnay,NORTHERN CAPE,High,20000
+2024,White,Chenin Blanc,NORTHERN CAPE,High,3744
+2024,White,Clairette blanche,NORTHERN CAPE,High,3744
+2024,White,Colombar,NORTHERN CAPE,High,3744
+2024,White,Palomino,NORTHERN CAPE,High,5709
+2024,White,Gewurztraminer,NORTHERN CAPE,High,2085
+2024,White,Muscat d'Alexandrie,NORTHERN CAPE,High,4399
+2024,White,Muscat de Frontignan,NORTHERN CAPE,High,2085
+2024,White,Pinot gris,NORTHERN CAPE,High,5709
+2024,White,Sauvignon blanc,NORTHERN CAPE,High,5054
+2024,White,Sémillon,NORTHERN CAPE,High,5054
+2024,White,Viognier,NORTHERN CAPE,High,4399
+2024,White,Riesling,NORTHERN CAPE,High,2085
+2024,White,Other White,NORTHERN CAPE,High,2085
+2024,Red,Cabernet Franc,NORTHERN CAPE,High,6364
+2024,Red,Cabernet Sauvignon,NORTHERN CAPE,High,6364
+2024,Red,Carignan,NORTHERN CAPE,High,6364
+2024,Red,Cinsaut,NORTHERN CAPE,High,6364
+2024,Red,Gamay noir,NORTHERN CAPE,High,6364
+2024,Red,Merlot,NORTHERN CAPE,High,6364
+2024,Red,Petit Verdot,NORTHERN CAPE,High,6364
+2024,Red,Pinot noir,NORTHERN CAPE,High,20000
+2024,Red,Pinotage,NORTHERN CAPE,High,6364
+2024,Red,Roobernet,NORTHERN CAPE,High,5054
+2024,Red,Ruby Cabernet,NORTHERN CAPE,High,5054
+2024,Red,Shiraz,NORTHERN CAPE,High,20000
+2024,Red,Tinta Barocca,NORTHERN CAPE,High,5054
+2024,Red,Other Red,NORTHERN CAPE,High,6364
+2024,White,Bukettraube,KLEIN KAROO   ,Low ,5055
+2024,White,Crouchen,KLEIN KAROO   ,Low ,5055
+2024,White,Chardonnay,KLEIN KAROO   ,Low ,1685
+2024,White,Chenin Blanc,KLEIN KAROO   ,Low ,4399
+2024,White,Clairette blanche,KLEIN KAROO   ,Low ,5055
+2024,White,Colombar,KLEIN KAROO   ,Low ,3500
+2024,White,Palomino,KLEIN KAROO   ,Low ,5055
+2024,White,Gewurztraminer,KLEIN KAROO   ,Low ,5055
+2024,White,Muscat d'Alexandrie,KLEIN KAROO   ,Low ,5710
+2024,White,Muscat de Frontignan,KLEIN KAROO   ,Low ,5055
+2024,White,Pinot gris,KLEIN KAROO   ,Low ,5710
+2024,White,Sauvignon blanc,KLEIN KAROO   ,Low ,5710
+2024,White,Sémillon,KLEIN KAROO   ,Low ,7114
+2024,White,Viognier,KLEIN KAROO   ,Low ,4000
+2024,White,Riesling,KLEIN KAROO   ,Low ,4399
+2024,White,Other White,KLEIN KAROO   ,Low ,5055
+2024,Red,Cabernet Franc,KLEIN KAROO   ,Low ,4174
+2024,Red,Cabernet Sauvignon,KLEIN KAROO   ,Low ,5055
+2024,Red,Carignan,KLEIN KAROO   ,Low ,5710
+2024,Red,Cinsaut,KLEIN KAROO   ,Low ,3000
+2024,Red,Gamay noir,KLEIN KAROO   ,Low ,4174
+2024,Red,Merlot,KLEIN KAROO   ,Low ,5710
+2024,Red,Petit Verdot,KLEIN KAROO   ,Low ,7769
+2024,Red,Pinot noir,KLEIN KAROO   ,Low ,10388
+2024,Red,Pinotage,KLEIN KAROO   ,Low ,5710
+2024,Red,Roobernet,KLEIN KAROO   ,Low ,4174
+2024,Red,Ruby Cabernet,KLEIN KAROO   ,Low ,4400
+2024,Red,Shiraz,KLEIN KAROO   ,Low ,4000
+2024,Red,Tinta Barocca,KLEIN KAROO   ,Low ,4000
+2024,Red,Other Red,KLEIN KAROO   ,Low ,4174
+2024,White,Bukettraube,KLEIN KAROO   ,High,8000
+2024,White,Crouchen,KLEIN KAROO   ,High,8000
+2024,White,Chardonnay,KLEIN KAROO   ,High,7769
+2024,White,Chenin Blanc,KLEIN KAROO   ,High,4526
+2024,White,Clairette blanche,KLEIN KAROO   ,High,8000
+2024,White,Colombar,KLEIN KAROO   ,High,4399
+2024,White,Palomino,KLEIN KAROO   ,High,8000
+2024,White,Gewurztraminer,KLEIN KAROO   ,High,8000
+2024,White,Muscat d'Alexandrie,KLEIN KAROO   ,High,6364
+2024,White,Muscat de Frontignan,KLEIN KAROO   ,High,8000
+2024,White,Pinot gris,KLEIN KAROO   ,High,6364
+2024,White,Sauvignon blanc,KLEIN KAROO   ,High,6364
+2024,White,Sémillon,KLEIN KAROO   ,High,9078
+2024,White,Viognier,KLEIN KAROO   ,High,6364
+2024,White,Riesling,KLEIN KAROO   ,High,11700
+2024,White,Other White,KLEIN KAROO   ,High,8000
+2024,Red,Cabernet Franc,KLEIN KAROO   ,High,6364
+2024,Red,Cabernet Sauvignon,KLEIN KAROO   ,High,11043
+2024,Red,Carignan,KLEIN KAROO   ,High,6364
+2024,Red,Cinsaut,KLEIN KAROO   ,High,5709
+2024,Red,Gamay noir,KLEIN KAROO   ,High,6364
+2024,Red,Merlot,KLEIN KAROO   ,High,9733
+2024,Red,Petit Verdot,KLEIN KAROO   ,High,8423
+2024,Red,Pinot noir,KLEIN KAROO   ,High,24927
+2024,Red,Pinotage,KLEIN KAROO   ,High,15783
+2024,Red,Roobernet,KLEIN KAROO   ,High,6364
+2024,Red,Ruby Cabernet,KLEIN KAROO   ,High,5054
+2024,Red,Shiraz,KLEIN KAROO   ,High,9733
+2024,Red,Tinta Barocca,KLEIN KAROO   ,High,4399
+2024,Red,Other Red,KLEIN KAROO   ,High,6364
+2024,White,Bukettraube,PAARL         ,Low ,5709
+2024,White,Crouchen,PAARL         ,Low ,5709
+2024,White,Chardonnay,PAARL         ,Low ,7744
+2024,White,Chenin Blanc,PAARL         ,Low ,4785
+2024,White,Clairette blanche,PAARL         ,Low ,12355
+2024,White,Colombar,PAARL         ,Low ,4104
+2024,White,Palomino,PAARL         ,Low ,5709
+2024,White,Gewurztraminer,PAARL         ,Low ,4400
+2024,White,Muscat d'Alexandrie,PAARL         ,Low ,5054
+2024,White,Muscat de Frontignan,PAARL         ,Low ,5709
+2024,White,Pinot gris,PAARL         ,Low ,5055
+2024,White,Sauvignon blanc,PAARL         ,Low ,6293
+2024,White,Sémillon,PAARL         ,Low ,9733
+2024,White,Viognier,PAARL         ,Low ,6613
+2024,White,Riesling,PAARL         ,Low ,5055
+2024,White,Other White,PAARL         ,Low ,5709
+2024,Red,Cabernet Franc,PAARL         ,Low ,6364
+2024,Red,Cabernet Sauvignon,PAARL         ,Low ,7802
+2024,Red,Carignan,PAARL         ,Low ,7738
+2024,Red,Cinsaut,PAARL         ,Low ,3745
+2024,Red,Gamay noir,PAARL         ,Low ,6590
+2024,Red,Merlot,PAARL         ,Low ,6510
+2024,Red,Petit Verdot,PAARL         ,Low ,7213
+2024,Red,Pinot noir,PAARL         ,Low ,8311
+2024,Red,Pinotage,PAARL         ,Low ,5992
+2024,Red,Roobernet,PAARL         ,Low ,6364
+2024,Red,Ruby Cabernet,PAARL         ,Low ,5709
+2024,Red,Shiraz,PAARL         ,Low ,6294
+2024,Red,Tinta Barocca,PAARL         ,Low ,5000
+2024,Red,Other Red,PAARL         ,Low ,6590
+2024,White,Bukettraube,PAARL         ,High,5817
+2024,White,Crouchen,PAARL         ,High,5817
+2024,White,Chardonnay,PAARL         ,High,7768
+2024,White,Chenin Blanc,PAARL         ,High,5054
+2024,White,Clairette blanche,PAARL         ,High,13046
+2024,White,Colombar,PAARL         ,High,4399
+2024,White,Palomino,PAARL         ,High,5817
+2024,White,Gewurztraminer,PAARL         ,High,5000
+2024,White,Muscat d'Alexandrie,PAARL         ,High,7436
+2024,White,Muscat de Frontignan,PAARL         ,High,28000
+2024,White,Pinot gris,PAARL         ,High,5709
+2024,White,Sauvignon blanc,PAARL         ,High,7768
+2024,White,Sémillon,PAARL         ,High,13733
+2024,White,Viognier,PAARL         ,High,7113
+2024,White,Riesling,PAARL         ,High,5709
+2024,White,Other White,PAARL         ,High,5817
+2024,Red,Cabernet Franc,PAARL         ,High,7366
+2024,Red,Cabernet Sauvignon,PAARL         ,High,12354
+2024,Red,Carignan,PAARL         ,High,9078
+2024,Red,Cinsaut,PAARL         ,High,5892
+2024,Red,Gamay noir,PAARL         ,High,7113
+2024,Red,Merlot,PAARL         ,High,7768
+2024,Red,Petit Verdot,PAARL         ,High,8423
+2024,Red,Pinot noir,PAARL         ,High,8423
+2024,Red,Pinotage,PAARL         ,High,6364
+2024,Red,Roobernet,PAARL         ,High,10000
+2024,Red,Ruby Cabernet,PAARL         ,High,5733
+2024,Red,Shiraz,PAARL         ,High,7768
+2024,Red,Tinta Barocca,PAARL         ,High,5709
+2024,Red,Other Red,PAARL         ,High,7113
+2024,White,Bukettraube,STELLENBOSCH  ,Low ,7548
+2024,White,Crouchen,STELLENBOSCH  ,Low ,7548
+2024,White,Chardonnay,STELLENBOSCH  ,Low ,10624
+2024,White,Chenin Blanc,STELLENBOSCH  ,Low ,7965
+2024,White,Clairette blanche,STELLENBOSCH  ,Low ,8000
+2024,White,Colombar,STELLENBOSCH  ,Low ,7548
+2024,White,Palomino,STELLENBOSCH  ,Low ,7548
+2024,White,Gewurztraminer,STELLENBOSCH  ,Low ,6000
+2024,White,Muscat d'Alexandrie,STELLENBOSCH  ,Low ,9734
+2024,White,Muscat de Frontignan,STELLENBOSCH  ,Low ,7548
+2024,White,Pinot gris,STELLENBOSCH  ,Low ,7113
+2024,White,Sauvignon blanc,STELLENBOSCH  ,Low ,7804
+2024,White,Sémillon,STELLENBOSCH  ,Low ,8613
+2024,White,Viognier,STELLENBOSCH  ,Low ,7911
+2024,White,Riesling,STELLENBOSCH  ,Low ,7769
+2024,White,Other White,STELLENBOSCH  ,Low ,7548
+2024,Red,Cabernet Franc,STELLENBOSCH  ,Low ,10792
+2024,Red,Cabernet Sauvignon,STELLENBOSCH  ,Low ,10546
+2024,Red,Carignan,STELLENBOSCH  ,Low ,9995
+2024,Red,Cinsaut,STELLENBOSCH  ,Low ,8720
+2024,Red,Gamay noir,STELLENBOSCH  ,Low ,9734
+2024,Red,Merlot,STELLENBOSCH  ,Low ,9951
+2024,Red,Petit Verdot,STELLENBOSCH  ,Low ,11699
+2024,Red,Pinot noir,STELLENBOSCH  ,Low ,9288
+2024,Red,Pinotage,STELLENBOSCH  ,Low ,9613
+2024,Red,Roobernet,STELLENBOSCH  ,Low ,9995
+2024,Red,Ruby Cabernet,STELLENBOSCH  ,Low ,9995
+2024,Red,Shiraz,STELLENBOSCH  ,Low ,7744
+2024,Red,Tinta Barocca,STELLENBOSCH  ,Low ,9995
+2024,Red,Other Red,STELLENBOSCH  ,Low ,9995
+2024,White,Bukettraube,STELLENBOSCH  ,High,7768
+2024,White,Crouchen,STELLENBOSCH  ,High,7768
+2024,White,Chardonnay,STELLENBOSCH  ,High,11699
+2024,White,Chenin Blanc,STELLENBOSCH  ,High,9078
+2024,White,Clairette blanche,STELLENBOSCH  ,High,8423
+2024,White,Colombar,STELLENBOSCH  ,High,7768
+2024,White,Palomino,STELLENBOSCH  ,High,7768
+2024,White,Gewurztraminer,STELLENBOSCH  ,High,6364
+2024,White,Muscat d'Alexandrie,STELLENBOSCH  ,High,10388
+2024,White,Muscat de Frontignan,STELLENBOSCH  ,High,7768
+2024,White,Pinot gris,STELLENBOSCH  ,High,7247
+2024,White,Sauvignon blanc,STELLENBOSCH  ,High,9733
+2024,White,Sémillon,STELLENBOSCH  ,High,10388
+2024,White,Viognier,STELLENBOSCH  ,High,9078
+2024,White,Riesling,STELLENBOSCH  ,High,8423
+2024,White,Other White,STELLENBOSCH  ,High,7768
+2024,Red,Cabernet Franc,STELLENBOSCH  ,High,12354
+2024,Red,Cabernet Sauvignon,STELLENBOSCH  ,High,15629
+2024,Red,Carignan,STELLENBOSCH  ,High,11043
+2024,Red,Cinsaut,STELLENBOSCH  ,High,9078
+2024,Red,Gamay noir,STELLENBOSCH  ,High,10000
+2024,Red,Merlot,STELLENBOSCH  ,High,12354
+2024,Red,Petit Verdot,STELLENBOSCH  ,High,12658
+2024,Red,Pinot noir,STELLENBOSCH  ,High,9733
+2024,Red,Pinotage,STELLENBOSCH  ,High,10388
+2024,Red,Roobernet,STELLENBOSCH  ,High,11043
+2024,Red,Ruby Cabernet,STELLENBOSCH  ,High,11043
+2024,Red,Shiraz,STELLENBOSCH  ,High,7768
+2024,Red,Tinta Barocca,STELLENBOSCH  ,High,11043
+2024,Red,Other Red,STELLENBOSCH  ,High,11043
+2024,White,Bukettraube,CAPE SOUTH COAST,Low ,7768
+2024,White,Crouchen,CAPE SOUTH COAST,Low ,7768
+2024,White,Chardonnay,CAPE SOUTH COAST,Low ,14441
+2024,White,Chenin Blanc,CAPE SOUTH COAST,Low ,8945
+2024,White,Clairette blanche,CAPE SOUTH COAST,Low ,7769
+2024,White,Colombar,CAPE SOUTH COAST,Low ,7768
+2024,White,Palomino,CAPE SOUTH COAST,Low ,7768
+2024,White,Gewurztraminer,CAPE SOUTH COAST,Low ,5710
+2024,White,Muscat d'Alexandrie,CAPE SOUTH COAST,Low ,9298
+2024,White,Muscat de Frontignan,CAPE SOUTH COAST,Low ,7768
+2024,White,Pinot gris,CAPE SOUTH COAST,Low ,5750
+2024,White,Sauvignon blanc,CAPE SOUTH COAST,Low ,11717
+2024,White,Sémillon,CAPE SOUTH COAST,Low ,10598
+2024,White,Viognier,CAPE SOUTH COAST,Low ,13266
+2024,White,Riesling,CAPE SOUTH COAST,Low ,12850
+2024,White,Other White,CAPE SOUTH COAST,Low ,7768
+2024,Red,Cabernet Franc,CAPE SOUTH COAST,Low ,16100
+2024,Red,Cabernet Sauvignon,CAPE SOUTH COAST,Low ,12500
+2024,Red,Carignan,CAPE SOUTH COAST,Low ,6000
+2024,Red,Cinsaut,CAPE SOUTH COAST,Low ,5055
+2024,Red,Gamay noir,CAPE SOUTH COAST,Low ,9734
+2024,Red,Merlot,CAPE SOUTH COAST,Low ,11856
+2024,Red,Petit Verdot,CAPE SOUTH COAST,Low ,7769
+2024,Red,Pinot noir,CAPE SOUTH COAST,Low ,15246
+2024,Red,Pinotage,CAPE SOUTH COAST,Low ,10388
+2024,Red,Roobernet,CAPE SOUTH COAST,Low ,10137
+2024,Red,Ruby Cabernet,CAPE SOUTH COAST,Low ,10137
+2024,Red,Shiraz,CAPE SOUTH COAST,Low ,11542
+2024,Red,Tinta Barocca,CAPE SOUTH COAST,Low ,10137
+2024,Red,Other Red,CAPE SOUTH COAST,Low ,10137
+2024,White,Bukettraube,CAPE SOUTH COAST,High,17500
+2024,White,Crouchen,CAPE SOUTH COAST,High,17500
+2024,White,Chardonnay,CAPE SOUTH COAST,High,19866
+2024,White,Chenin Blanc,CAPE SOUTH COAST,High,9078
+2024,White,Clairette blanche,CAPE SOUTH COAST,High,8423
+2024,White,Colombar,CAPE SOUTH COAST,High,17500
+2024,White,Palomino,CAPE SOUTH COAST,High,17500
+2024,White,Gewurztraminer,CAPE SOUTH COAST,High,6364
+2024,White,Muscat d'Alexandrie,CAPE SOUTH COAST,High,10388
+2024,White,Muscat de Frontignan,CAPE SOUTH COAST,High,17500
+2024,White,Pinot gris,CAPE SOUTH COAST,High,7113
+2024,White,Sauvignon blanc,CAPE SOUTH COAST,High,13087
+2024,White,Sémillon,CAPE SOUTH COAST,High,13500
+2024,White,Viognier,CAPE SOUTH COAST,High,13454
+2024,White,Riesling,CAPE SOUTH COAST,High,12946
+2024,White,Other White,CAPE SOUTH COAST,High,17500
+2024,Red,Cabernet Franc,CAPE SOUTH COAST,High,16557
+2024,Red,Cabernet Sauvignon,CAPE SOUTH COAST,High,15629
+2024,Red,Carignan,CAPE SOUTH COAST,High,6364
+2024,Red,Cinsaut,CAPE SOUTH COAST,High,9078
+2024,Red,Gamay noir,CAPE SOUTH COAST,High,10388
+2024,Red,Merlot,CAPE SOUTH COAST,High,13100
+2024,Red,Petit Verdot,CAPE SOUTH COAST,High,11699
+2024,Red,Pinot noir,CAPE SOUTH COAST,High,20300
+2024,Red,Pinotage,CAPE SOUTH COAST,High,12000
+2024,Red,Roobernet,CAPE SOUTH COAST,High,11043
+2024,Red,Ruby Cabernet,CAPE SOUTH COAST,High,11043
+2024,Red,Shiraz,CAPE SOUTH COAST,High,12310
+2024,Red,Tinta Barocca,CAPE SOUTH COAST,High,11043
+2024,Red,Other Red,CAPE SOUTH COAST,High,11043
+2024,White,Bukettraube,CAPE TOWN,Low ,7768
+2024,White,Crouchen,CAPE TOWN,Low ,7768
+2024,White,Chardonnay,CAPE TOWN,Low ,10227
+2024,White,Chenin Blanc,CAPE TOWN,Low ,9078
+2024,White,Clairette blanche,CAPE TOWN,Low ,7769
+2024,White,Colombar,CAPE TOWN,Low ,7768
+2024,White,Palomino,CAPE TOWN,Low ,7768
+2024,White,Gewurztraminer,CAPE TOWN,Low ,5710
+2024,White,Muscat d'Alexandrie,CAPE TOWN,Low ,10000
+2024,White,Muscat de Frontignan,CAPE TOWN,Low ,7768
+2024,White,Pinot gris,CAPE TOWN,Low ,7768
+2024,White,Sauvignon blanc,CAPE TOWN,Low ,9581
+2024,White,Sémillon,CAPE TOWN,Low ,8575
+2024,White,Viognier,CAPE TOWN,Low ,9078
+2024,White,Riesling,CAPE TOWN,Low ,7769
+2024,White,Other White,CAPE TOWN,Low ,7768
+2024,Red,Cabernet Franc,CAPE TOWN,Low ,7719
+2024,Red,Cabernet Sauvignon,CAPE TOWN,Low ,8795
+2024,Red,Carignan,CAPE TOWN,Low ,9808
+2024,Red,Cinsaut,CAPE TOWN,Low ,7769
+2024,Red,Gamay noir,CAPE TOWN,Low ,9734
+2024,Red,Merlot,CAPE TOWN,Low ,10452
+2024,Red,Petit Verdot,CAPE TOWN,Low ,8228
+2024,Red,Pinot noir,CAPE TOWN,Low ,9055
+2024,Red,Pinotage,CAPE TOWN,Low ,9336
+2024,Red,Roobernet,CAPE TOWN,Low ,9808
+2024,Red,Ruby Cabernet,CAPE TOWN,Low ,9808
+2024,Red,Shiraz,CAPE TOWN,Low ,7768
+2024,Red,Tinta Barocca,CAPE TOWN,Low ,9808
+2024,Red,Other Red,CAPE TOWN,Low ,9808
+2024,White,Bukettraube,CAPE TOWN,High,8500
+2024,White,Crouchen,CAPE TOWN,High,8500
+2024,White,Chardonnay,CAPE TOWN,High,11699
+2024,White,Chenin Blanc,CAPE TOWN,High,9462
+2024,White,Clairette blanche,CAPE TOWN,High,8423
+2024,White,Colombar,CAPE TOWN,High,8500
+2024,White,Palomino,CAPE TOWN,High,8500
+2024,White,Gewurztraminer,CAPE TOWN,High,6364
+2024,White,Muscat d'Alexandrie,CAPE TOWN,High,10388
+2024,White,Muscat de Frontignan,CAPE TOWN,High,17500
+2024,White,Pinot gris,CAPE TOWN,High,8500
+2024,White,Sauvignon blanc,CAPE TOWN,High,9733
+2024,White,Sémillon,CAPE TOWN,High,10388
+2024,White,Viognier,CAPE TOWN,High,9781
+2024,White,Riesling,CAPE TOWN,High,8801
+2024,White,Other White,CAPE TOWN,High,8500
+2024,Red,Cabernet Franc,CAPE TOWN,High,12354
+2024,Red,Cabernet Sauvignon,CAPE TOWN,High,15629
+2024,Red,Carignan,CAPE TOWN,High,11043
+2024,Red,Cinsaut,CAPE TOWN,High,9078
+2024,Red,Gamay noir,CAPE TOWN,High,10388
+2024,Red,Merlot,CAPE TOWN,High,12354
+2024,Red,Petit Verdot,CAPE TOWN,High,11699
+2024,Red,Pinot noir,CAPE TOWN,High,9733
+2024,Red,Pinotage,CAPE TOWN,High,10388
+2024,Red,Roobernet,CAPE TOWN,High,11043
+2024,Red,Ruby Cabernet,CAPE TOWN,High,11043
+2024,Red,Shiraz,CAPE TOWN,High,8696
+2024,Red,Tinta Barocca,CAPE TOWN,High,11043
+2024,Red,Other Red,CAPE TOWN,High,11043
+2024,White,Bukettraube,SWARTLAND     ,Low ,5178
+2024,White,Crouchen,SWARTLAND     ,Low ,5178
+2024,White,Chardonnay,SWARTLAND     ,Low ,7317
+2024,White,Chenin Blanc,SWARTLAND     ,Low ,5054
+2024,White,Clairette blanche,SWARTLAND     ,Low ,12355
+2024,White,Colombar,SWARTLAND     ,Low ,4241
+2024,White,Palomino,SWARTLAND     ,Low ,5178
+2024,White,Gewurztraminer,SWARTLAND     ,Low ,4400
+2024,White,Muscat d'Alexandrie,SWARTLAND     ,Low ,3505
+2024,White,Muscat de Frontignan,SWARTLAND     ,Low ,4108
+2024,White,Pinot gris,SWARTLAND     ,Low ,5709
+2024,White,Sauvignon blanc,SWARTLAND     ,Low ,7768
+2024,White,Sémillon,SWARTLAND     ,Low ,9733
+2024,White,Viognier,SWARTLAND     ,Low ,7028
+2024,White,Riesling,SWARTLAND     ,Low ,5055
+2024,White,Other White,SWARTLAND     ,Low ,5178
+2024,Red,Cabernet Franc,SWARTLAND     ,Low ,6000
+2024,Red,Cabernet Sauvignon,SWARTLAND     ,Low ,7242
+2024,Red,Carignan,SWARTLAND     ,Low ,9078
+2024,Red,Cinsaut,SWARTLAND     ,Low ,3745
+2024,Red,Gamay noir,SWARTLAND     ,Low ,6662
+2024,Red,Merlot,SWARTLAND     ,Low ,7631
+2024,Red,Petit Verdot,SWARTLAND     ,Low ,7857
+2024,Red,Pinot noir,SWARTLAND     ,Low ,8423
+2024,Red,Pinotage,SWARTLAND     ,Low ,6052
+2024,Red,Roobernet,SWARTLAND     ,Low ,5719
+2024,Red,Ruby Cabernet,SWARTLAND     ,Low ,4200
+2024,Red,Shiraz,SWARTLAND     ,Low ,6859
+2024,Red,Tinta Barocca,SWARTLAND     ,Low ,5543
+2024,Red,Other Red,SWARTLAND     ,Low ,6662
+2024,White,Bukettraube,SWARTLAND     ,High,5709
+2024,White,Crouchen,SWARTLAND     ,High,5709
+2024,White,Chardonnay,SWARTLAND     ,High,7768
+2024,White,Chenin Blanc,SWARTLAND     ,High,5298
+2024,White,Clairette blanche,SWARTLAND     ,High,13046
+2024,White,Colombar,SWARTLAND     ,High,4399
+2024,White,Palomino,SWARTLAND     ,High,5709
+2024,White,Gewurztraminer,SWARTLAND     ,High,5054
+2024,White,Muscat d'Alexandrie,SWARTLAND     ,High,5054
+2024,White,Muscat de Frontignan,SWARTLAND     ,High,5709
+2024,White,Pinot gris,SWARTLAND     ,High,5723
+2024,White,Sauvignon blanc,SWARTLAND     ,High,8091
+2024,White,Sémillon,SWARTLAND     ,High,9959
+2024,White,Viognier,SWARTLAND     ,High,7113
+2024,White,Riesling,SWARTLAND     ,High,25262
+2024,White,Other White,SWARTLAND     ,High,5709
+2024,Red,Cabernet Franc,SWARTLAND     ,High,6364
+2024,Red,Cabernet Sauvignon,SWARTLAND     ,High,12354
+2024,Red,Carignan,SWARTLAND     ,High,15412
+2024,Red,Cinsaut,SWARTLAND     ,High,6664
+2024,Red,Gamay noir,SWARTLAND     ,High,7113
+2024,Red,Merlot,SWARTLAND     ,High,7768
+2024,Red,Petit Verdot,SWARTLAND     ,High,8423
+2024,Red,Pinot noir,SWARTLAND     ,High,9028
+2024,Red,Pinotage,SWARTLAND     ,High,6364
+2024,Red,Roobernet,SWARTLAND     ,High,6364
+2024,Red,Ruby Cabernet,SWARTLAND     ,High,5709
+2024,Red,Shiraz,SWARTLAND     ,High,7768
+2024,Red,Tinta Barocca,SWARTLAND     ,High,5709
+2024,Red,Other Red,SWARTLAND     ,High,7113
