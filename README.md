@@ -1,6 +1,6 @@
 # Vineyard Production Tool (VPT)
 
-A Streamlit-based scenario model for comparing vineyard production budgets with regional industry benchmarks.
+A scenario-based decision-support tool for benchmarking vineyard production budgets against regional industry ranges.
 
 ## Features
 - Farmer input panel
@@ -13,6 +13,10 @@ A Streamlit-based scenario model for comparing vineyard production budgets with 
 
 ```bash
 streamlit run s7.py
+```
 
 ## Author
 Riekie Cloete — Jerry Analytics
+
+## Live App
+[Open the Vineyard Production Tool](https://vineyard-regional-tool-app.streamlit.app/)
