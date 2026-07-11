@@ -1,0 +1,3 @@
+Copy the existing yield.csv file from the current benchmark_budget project into this data folder.
+
+The application will also find yield.csv if it remains in the project root.
