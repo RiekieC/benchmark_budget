@@ -521,6 +521,26 @@ SC = build_scenario(scenario_key)
 SC_LABEL = SC["label"]
 
 # -----------------------
+# Share Phase 1 current/base inputs with Phase 2
+# -----------------------
+# In the multipage app, Streamlit keeps st.session_state while the user moves
+# between pages. This block therefore lets Phase 2 use the current Phase 1
+# selections and farmer inputs as the base year for the 2030 forecast.
+st.session_state["phase1_current_base"] = {
+    "wine_class": wine_class,
+    "grape_variety": grape_variety,
+    "region": region,
+    "year": int(year) if year is not None else None,
+    "scenario_key": scenario_key,
+    "scenario_label": SC_LABEL,
+    "farmer_income_rt": float(gross_income_current),
+    "farmer_yield": float(yield_current),
+    "provision_for_renewal": float(provision_for_renewal),
+    "farmer_costs": aligned[["Category", "Item", "Cost"]].to_dict("records"),
+    "last_updated": datetime.now().isoformat(timespec="seconds"),
+}
+
+# -----------------------
 # Build rows
 # -----------------------
 rows = []
