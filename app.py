@@ -28,7 +28,7 @@ def main() -> None:
         ),
         st.Page(
             str(PROJECT_ROOT / "views" / "phase3_future.py"),
-            title="Phase 3 — Future Analysis",
+            title="Phase 3 — Cost & Yield Scenarios",
             icon="🧭",
         ),
     ]
