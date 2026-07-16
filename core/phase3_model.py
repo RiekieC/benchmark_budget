@@ -22,6 +22,8 @@ CASE_COEFFICIENTS = {
     "Upper response": "ci_97_5",
 }
 
+PROPAGATION_ROUNDS = 2
+
 
 @dataclass(frozen=True)
 class AccountSpec:
@@ -191,9 +193,7 @@ def _propagate_cost_changes(
     input_relationships: pd.DataFrame,
     area: str,
     coefficient_column: str,
-    selected_key: str,
-    selected_change: float,
-    rounds: int,
+    selected_changes: dict[str, float],
     supported_keys: set[str],
 ) -> tuple[dict[str, float], pd.DataFrame, dict[str, int]]:
     rows = _area_rows(input_relationships, "area", area)
@@ -204,11 +204,12 @@ def _propagate_cost_changes(
     ].copy()
 
     current = {key: 0.0 for key in supported_keys}
-    current[selected_key] = selected_change
+    for key, change in selected_changes.items():
+        current[key] = float(change)
     total = dict(current)
     audit_rows: list[dict[str, Any]] = []
 
-    for round_number in range(1, int(rounds) + 1):
+    for round_number in range(1, PROPAGATION_ROUNDS + 1):
         next_round = {key: 0.0 for key in supported_keys}
         for row in rows.itertuples(index=False):
             predictor = str(row.predictor_cost_key)
@@ -324,40 +325,48 @@ def calculate_phase3_scenario(
     industry_yield_cap: float | None,
     area: str,
     cultivar: str,
-    selected_key: str,
-    adjustment_percent: float,
-    rounds: int,
+    adjustments: dict[str, float],
     input_relationships: pd.DataFrame,
     yield_relationships: pd.DataFrame,
 ) -> dict[str, Any]:
-    if selected_key not in MODEL_KEY_TO_SPEC:
-        raise ValueError(f"Unsupported Phase 3 account: {selected_key}")
-    if adjustment_percent <= -100.0:
-        raise ValueError("The selected cost adjustment must be greater than -100%.")
-    if rounds not in (1, 2):
-        raise ValueError("Phase 3 permits one or two bounded propagation rounds.")
+    if not adjustments:
+        raise ValueError("Select at least one Phase 3 cost adjustment.")
+    invalid_keys = [key for key in adjustments if key not in MODEL_KEY_TO_SPEC]
+    if invalid_keys:
+        raise ValueError(f"Unsupported Phase 3 account(s): {', '.join(invalid_keys)}")
+    invalid_percentages = [key for key, value in adjustments.items() if float(value) <= -100.0]
+    if invalid_percentages:
+        raise ValueError("Every selected cost adjustment must be greater than -100%.")
 
     costs = prepare_farmer_costs(farmer_costs.to_dict("records"))
     account_baselines = _account_baselines(costs)
-    if selected_key not in account_baselines:
-        raise ValueError("The selected coefficient account is not available in the Phase 1 cost lines.")
+    missing_keys = [key for key in adjustments if key not in account_baselines]
+    if missing_keys:
+        raise ValueError("One or more selected coefficient accounts are not available in the Phase 1 cost lines.")
 
     input_relationships = clean_relationship_data(input_relationships)
     yield_relationships = clean_relationship_data(yield_relationships)
     supported_keys = set(account_baselines)
-    selected_log_change = log1p(float(adjustment_percent) / 100.0)
+    selected_log_changes = {
+        key: log1p(float(value) / 100.0)
+        for key, value in adjustments.items()
+    }
 
     baseline_cash_cost = float(costs["Cost"].sum())
     baseline_total_cost = baseline_cash_cost + float(provision_for_renewal)
     baseline_revenue = float(grape_price_per_tonne) * float(baseline_yield)
     baseline_nfi = baseline_revenue - baseline_total_cost
-    selected_baseline_cost = account_baselines[selected_key]["baseline_cost"]
-    direct_cost_change = selected_baseline_cost * (exp(selected_log_change) - 1.0)
+    selected_baseline_cost = sum(account_baselines[key]["baseline_cost"] for key in adjustments)
+    direct_cost_change = sum(
+        account_baselines[key]["baseline_cost"] * (exp(selected_log_changes[key]) - 1.0)
+        for key in adjustments
+    )
 
     summary_rows = [
         {
             "Case": "Phase 1 baseline",
-            "Selected input cost (R/ha)": selected_baseline_cost,
+            "Selected costs (R/ha)": selected_baseline_cost,
+            "Direct cost change (R/ha)": 0.0,
             "Associated cost change (R/ha)": 0.0,
             "Yield (t/ha)": float(baseline_yield),
             "Revenue (R/ha)": baseline_revenue,
@@ -377,9 +386,7 @@ def calculate_phase3_scenario(
             input_relationships=input_relationships,
             area=area,
             coefficient_column=coefficient_column,
-            selected_key=selected_key,
-            selected_change=selected_log_change,
-            rounds=rounds,
+            selected_changes=selected_log_changes,
             supported_keys=supported_keys,
         )
         adjusted_costs = _adjust_cost_table(costs, total_log_changes)
@@ -387,7 +394,7 @@ def calculate_phase3_scenario(
         scenario_total_cost = scenario_cash_cost + float(provision_for_renewal)
         selected_scenario_cost = float(
             adjusted_costs.loc[
-                adjusted_costs["Model key"] == selected_key, "Scenario cost (R/ha)"
+                adjusted_costs["Model key"].isin(adjustments), "Scenario cost (R/ha)"
             ].sum()
         )
         associated_cost_change = scenario_total_cost - baseline_total_cost - direct_cost_change
@@ -406,7 +413,8 @@ def calculate_phase3_scenario(
         summary_rows.append(
             {
                 "Case": case,
-                "Selected input cost (R/ha)": selected_scenario_cost,
+                "Selected costs (R/ha)": selected_scenario_cost,
+                "Direct cost change (R/ha)": direct_cost_change,
                 "Associated cost change (R/ha)": associated_cost_change,
                 "Yield (t/ha)": adjusted_yield,
                 "Revenue (R/ha)": revenue,
@@ -437,7 +445,9 @@ def calculate_phase3_scenario(
         "yield_details": pd.concat(yield_details, ignore_index=True) if yield_details else pd.DataFrame(),
         "matrix_diagnostic": matrix_diagnostic(input_relationships, area),
         "coverage": coverage_by_case,
-        "selected_account": account_baselines[selected_key],
+        "selected_accounts": [account_baselines[key] for key in adjustments],
+        "adjustments": dict(adjustments),
         "direct_cost_change": direct_cost_change,
         "industry_yield_cap": industry_yield_cap,
+        "rounds": PROPAGATION_ROUNDS,
     }
