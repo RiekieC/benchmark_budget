@@ -44,6 +44,17 @@ def resolve_data_file(filename: str) -> Path:
     searched = ", ".join(str(path) for path in candidates)
     raise FileNotFoundError(f"Could not find {filename}. Checked: {searched}")
 
+
+def resolve_first_data_file(*filenames: str) -> Path:
+    """Return the first available preferred data file."""
+    searched: list[str] = []
+    for filename in filenames:
+        for candidate in [DATA_DIR / filename, PROJECT_ROOT / filename]:
+            searched.append(str(candidate))
+            if candidate.exists():
+                return candidate
+    raise FileNotFoundError("Could not find a suitable data file. Checked: " + ", ".join(searched))
+
 # --- Streamlit layout ---
 st.markdown("""
 <style>
@@ -84,7 +95,7 @@ with st.expander("Quick Guide", expanded=False):
   - **Scenario 3 – Organic + Fairtrade**
 
 **How to use**
-1. In the **sidebar**, type your data (vineyard profile, income, yield, costs).
+1. In the **sidebar**, select **2024 or 2025** and enter the vineyard profile, income, yield and costs.
 2. Click a **Scenario** above to switch the comparison mode.
 3. Review the **tables and charts** below.
 4. **Export** your results as **CSV**, **Excel**, or **PDF**  
@@ -124,57 +135,89 @@ with st.expander("Quick Guide", expanded=False):
 @st.cache_data
 def load_data():
     try:
-        income = pd.read_csv(resolve_data_file("income.csv"), encoding="utf-8-sig")
-        yield_df = pd.read_csv(resolve_data_file("yield.csv"), encoding="utf-8-sig")
-        costs = pd.read_csv(resolve_data_file("costs.csv"), encoding="utf-8-sig")
+        income = pd.read_csv(
+            resolve_first_data_file(
+                "income_2024_2025_with_average_annual_growth_percent.csv",
+                "income.csv",
+            ),
+            encoding="utf-8-sig",
+        )
+        yield_df = pd.read_csv(
+            resolve_first_data_file("yield.csv"),
+            encoding="utf-8-sig",
+        )
+        costs = pd.read_csv(
+            resolve_first_data_file(
+                "costs_2024_2025_with_blended_growth_percent.csv",
+                "costs.csv",
+            ),
+            encoding="utf-8-sig",
+        )
     except FileNotFoundError as exc:
         st.error(str(exc))
-        st.info("Copy yield.csv into the project root or the data folder, then rerun the app.")
+        st.info(
+            "Copy the combined 2024/2025 income and cost files, together with yield.csv, "
+            "into the project data folder and rerun the app."
+        )
         st.stop()
+
     for df in (income, yield_df, costs):
         df.columns = [str(c).strip() for c in df.columns]
 
     def norm(df):
         for col in ["Wine Class", "Grape Variety", "Region", "Band"]:
             if col in df.columns:
-                if col == "Band":
-                    df[col] = df[col].astype(str).str.strip().str.title()
-                elif col == "Wine Class":
+                if col in {"Band", "Wine Class"}:
                     df[col] = df[col].astype(str).str.strip().str.title()
                 else:
                     df[col] = df[col].astype(str).str.strip()
         return df
 
-    income = norm(income);
-    yield_df = norm(yield_df);
+    income = norm(income)
+    yield_df = norm(yield_df)
     costs = norm(costs)
 
     if "Income_R_per_t" not in income.columns:
         guess = [c for c in income.columns if "income" in c.lower()]
-        if guess: income = income.rename(columns={guess[0]: "Income_R_per_t"})
+        if guess:
+            income = income.rename(columns={guess[0]: "Income_R_per_t"})
+
     if "Yield_t_per_ha" not in yield_df.columns:
         guess = [c for c in yield_df.columns if "yield" in c.lower()]
-        if guess: yield_df = yield_df.rename(columns={guess[0]: "Yield_t_per_ha"})
+        if guess:
+            yield_df = yield_df.rename(columns={guess[0]: "Yield_t_per_ha"})
 
-    # If yield came in kg/ha, normalise to t/ha
+    if "YEAR" not in income.columns and "Year" in income.columns:
+        income = income.rename(columns={"Year": "YEAR"})
+    if "Year" not in costs.columns and "YEAR" in costs.columns:
+        costs = costs.rename(columns={"YEAR": "Year"})
+
+    # If yield came in kg/ha, normalise to t/ha.
     med = pd.to_numeric(yield_df["Yield_t_per_ha"], errors="coerce").median()
     if pd.notna(med) and med > 1000:
-        yield_df["Yield_t_per_ha"] = pd.to_numeric(yield_df["Yield_t_per_ha"], errors="coerce") / 1000.0
+        yield_df["Yield_t_per_ha"] = (
+            pd.to_numeric(yield_df["Yield_t_per_ha"], errors="coerce") / 1000.0
+        )
 
     if "Avg_Cost" not in costs.columns:
-        g = [c for c in costs.columns if "cost" in c.lower()]
-        if g:
-            costs = costs.rename(columns={g[0]: "Avg_Cost"})
+        guesses = [c for c in costs.columns if "cost" in c.lower()]
+        if guesses:
+            costs = costs.rename(columns={guesses[0]: "Avg_Cost"})
         else:
             costs["Avg_Cost"] = 0.0
+
     for col in ["Category", "Item", "Region"]:
         if col not in costs.columns:
             costs[col] = "Unknown"
 
-    # dtypes
     income["Income_R_per_t"] = pd.to_numeric(income["Income_R_per_t"], errors="coerce")
     yield_df["Yield_t_per_ha"] = pd.to_numeric(yield_df["Yield_t_per_ha"], errors="coerce")
     costs["Avg_Cost"] = pd.to_numeric(costs["Avg_Cost"], errors="coerce").fillna(0.0)
+    if "YEAR" in income.columns:
+        income["YEAR"] = pd.to_numeric(income["YEAR"], errors="coerce").astype("Int64")
+    if "Year" in costs.columns:
+        costs["Year"] = pd.to_numeric(costs["Year"], errors="coerce").astype("Int64")
+
     return income, yield_df, costs
 
 
@@ -231,6 +274,102 @@ FORBIDDEN = {"provision for renewal", "total expenditure", "totale kontant uitga
 def is_forbidden(text): return str(text).strip().lower() in FORBIDDEN
 
 
+def filter_costs_for_year(costs: pd.DataFrame, selected_year: int | None) -> pd.DataFrame:
+    """Return cost rows for the selected benchmark year."""
+    out = costs.copy()
+    if selected_year is not None and "Year" in out.columns:
+        year_values = pd.to_numeric(out["Year"], errors="coerce")
+        out = out[year_values == int(selected_year)].copy()
+    return out
+
+
+def lookup_industry_provision(
+    costs: pd.DataFrame,
+    region_name: str,
+    selected_year: int | None,
+    default: float = 20125.0,
+) -> float:
+    """Read the regional provision-for-renewal benchmark from the cost data."""
+    sub = filter_costs_for_year(costs, selected_year)
+    sub = sub[sub["Region"].astype(str).str.strip().str.lower() == str(region_name).strip().lower()]
+    provision_mask = (
+        sub["Category"].astype(str).str.strip().str.lower().eq("provision for renewal")
+        | sub["Item"].astype(str).str.strip().str.lower().eq("provision for renewal")
+    )
+    values = pd.to_numeric(sub.loc[provision_mask, "Avg_Cost"], errors="coerce").dropna()
+    return float(values.iloc[0]) if not values.empty else float(default)
+
+
+def build_scenarios(selected_year: int | None) -> dict:
+    """Return the sustainability assumptions belonging to the selected year."""
+    year_key = 2024 if int(selected_year or 2025) <= 2024 else 2025
+    assumptions = {
+        2024: {
+            "organic_material": 13349,
+            "crop_protection": 1053,
+            "fuel": 110,
+            "organic_admin": 555,
+            "fairtrade_labour_pct": 7.9,
+            "fairtrade_admin": 1666,
+            "combined_admin": 2221,
+        },
+        2025: {
+            "organic_material": 16081,
+            "crop_protection": 1053,
+            "fuel": 150,
+            "organic_admin": 610,
+            "fairtrade_labour_pct": 34.4,
+            "fairtrade_admin": 1830,
+            "combined_admin": 2440,
+        },
+    }[year_key]
+
+    return {
+        "Scenario 1 — Organic": {
+            "label": "Organic",
+            "diff_multiplier": 1.41,
+            "yield_high_pct": 0.0,
+            "income_abs": 0.0,
+            "cost_rules": [
+                ("item", "Saad, organiese bemesting en materiaal", "set", assumptions["organic_material"]),
+                ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", assumptions["crop_protection"]),
+                ("item", "Brandstof (petrol en diesel) en smeermiddels", "abs", assumptions["fuel"]),
+                ("item", "Administrasie", "abs", assumptions["organic_admin"]),
+                ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
+                ("item", "Onkruiddoder", "set", 0),
+            ],
+        },
+        "Scenario 2 — Fairtrade": {
+            "label": "Fairtrade",
+            "yield_low_pct": 0.0,
+            "yield_high_pct": 0.0,
+            "income_abs": 30.0,
+            "cost_rules": [
+                ("item", "Permanente arbeid", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Seisoensarbeid en kontrakwerk", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Administrasie", "abs", assumptions["fairtrade_admin"]),
+            ],
+        },
+        "Scenario 3 — Organic + Fairtrade": {
+            "label": "Organic + Fairtrade",
+            "diff_multiplier": 1.41,
+            "yield_high_pct": 0.0,
+            "income_abs": 30.0,
+            "cost_rules": [
+                ("item", "Saad, organiese bemesting en materiaal", "set", assumptions["organic_material"]),
+                ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", assumptions["crop_protection"]),
+                ("item", "Brandstof (petrol en diesel) en smeermiddels", "abs", assumptions["fuel"]),
+                ("item", "Administrasie", "abs", assumptions["combined_admin"]),
+                ("item", "Permanente arbeid", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Seisoensarbeid en kontrakwerk", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
+                ("item", "Onkruiddoder", "set", 0),
+                ("item", "Veevoer en medisyne / Droogmiddels", "set", 0),
+            ],
+        },
+    }
+
+
 # Fixed Step-1 category order
 CATEGORY_ORDER = ["Direkte koste", "Arbeid", "Meganisasie", "Vaste verbeteringe", "Algemene uitgawes"]
 
@@ -256,7 +395,19 @@ with st.sidebar:
     region = st.selectbox("Region", regions, index=(regions.index("Breedekloof") if "Breedekloof" in regions else 0))
 
     years = sorted(income_df.get("YEAR", pd.Series(dtype=float)).dropna().astype(int).unique().tolist())
-    year = st.selectbox("Year", years, index=(len(years) - 1 if years else 0)) if years else None
+    year = (
+        st.selectbox(
+            "Benchmark data year",
+            years,
+            index=(len(years) - 1 if years else 0),
+            help="Choose the historical 2024 benchmark or the latest 2025 benchmark.",
+        )
+        if years else None
+    )
+    selected_costs_df = filter_costs_for_year(costs_df, int(year) if year is not None else None)
+    industry_provision_default = lookup_industry_provision(
+        costs_df, region, int(year) if year is not None else None
+    )
 
     st.markdown("---")
     st.header("Farmer Income")
@@ -265,7 +416,7 @@ with st.sidebar:
 
     st.markdown("### Farmer Costs")
     st.caption("Enter costs by component")
-    region_costs_default = costs_df[costs_df["Region"].str.lower() == region.lower()].copy()
+    region_costs_default = selected_costs_df[selected_costs_df["Region"].str.lower() == region.lower()].copy()
     if region_costs_default.empty:
         st.warning("No costs found for this region. All costs default to 0. Edit as needed.")
 
@@ -284,7 +435,7 @@ with st.sidebar:
             for _, r in sub.iterrows():
                 # Include the region so its default costs do not leak into a
                 # newly selected region through Streamlit session state.
-                key = f"cost::{region}::{cat}::{r['Item']}"
+                key = f"cost::{year}::{region}::{cat}::{r['Item']}"
                 default_val = float(r["Avg_Cost"])
 
                 val = st.number_input(
@@ -295,17 +446,23 @@ with st.sidebar:
                 )
                 cost_inputs.append((cat, r["Item"], val))
 
-    provision_for_renewal = st.number_input("Provision for renewal (R/ha)",
-                                            min_value=0.0, step=100.0, value=20125.0, format="%.2f")
+    provision_for_renewal = st.number_input(
+        "Provision for renewal (R/ha)",
+        min_value=0.0,
+        step=100.0,
+        value=float(industry_provision_default),
+        format="%.2f",
+        key=f"provision::{year}::{region}",
+    )
 
 # -----------------------
 # Align lists and enforce ordering
 # -----------------------
 costs_df_user = pd.DataFrame(cost_inputs, columns=["Category", "Item", "Cost"])
-region_costs_avg = costs_df[
-    (costs_df["Region"].str.lower() == region.lower()) &
-    (~costs_df["Category"].apply(is_forbidden)) &
-    (~costs_df["Item"].apply(is_forbidden))
+region_costs_avg = selected_costs_df[
+    (selected_costs_df["Region"].str.lower() == region.lower()) &
+    (~selected_costs_df["Category"].apply(is_forbidden)) &
+    (~selected_costs_df["Item"].apply(is_forbidden))
     ].copy()
 avg_items = region_costs_avg[["Category", "Item", "Avg_Cost"]].rename(columns={"Avg_Cost": "Avg"}).copy()
 
@@ -322,10 +479,10 @@ aligned["Avg"] = pd.to_numeric(aligned["Avg"], errors="coerce")
 
 cat_order_map = {c: i for i, c in enumerate(CATEGORY_ORDER)}
 aligned["__cat_order"] = aligned["Category"].map(lambda c: cat_order_map.get(c, 999))
-order_src = costs_df[
-    (costs_df["Region"].str.lower() == region.lower()) &
-    (~costs_df["Category"].apply(is_forbidden)) &
-    (~costs_df["Item"].apply(is_forbidden))
+order_src = selected_costs_df[
+    (selected_costs_df["Region"].str.lower() == region.lower()) &
+    (~selected_costs_df["Category"].apply(is_forbidden)) &
+    (~selected_costs_df["Item"].apply(is_forbidden))
     ].copy()
 order_src["__item_idx"] = order_src.groupby("Category").cumcount()
 aligned = aligned.merge(order_src[["Category", "Item", "__item_idx"]], on=["Category", "Item"], how="left")
@@ -335,7 +492,7 @@ aligned = aligned.sort_values(["__cat_order", "__item_idx"], kind="stable").rese
 # -----------------------
 # Baselines
 # -----------------------
-INDUSTRY_PROVISION = 20125.0
+INDUSTRY_PROVISION = float(industry_provision_default)
 
 industry_total_cash = float(pd.to_numeric(aligned["Avg"], errors="coerce").fillna(0).sum())
 industry_total_expenditure = industry_total_cash + INDUSTRY_PROVISION
@@ -360,63 +517,7 @@ net_high = (income_high_rha - industry_total_expenditure) if income_high_rha is 
 # -----------------------
 # Scenarios (Organic, Fairtrade)
 # -----------------------
-SCENARIOS = {
-    "Scenario 1 — Organic": {
-        "label": "Organic",
-        # Per-band yield adjustments: Low -20%, High 0%
-        "diff_multiplier": 1.41,
-        "yield_high_pct": 0.0,
-        "income_abs": 0.0,  # R/t change
-        "cost_rules": [
-            # FIXED value (replace) for organic material:
-            ("item", "Saad, organiese bemesting en materiaal", "set", 13349),
-            # Additional allowances from your sheet:
-            ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", 1053),
-            ("category", "Meganisasie", "abs", 110),
-            ("item", "Administrasie", "abs", 555),
-            ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
-            ("item", "Onkruiddoder", "set", 0),
-        ],
-    },
-    "Scenario 2 — Fairtrade": {
-        "label": "Fairtrade",
-        # Yield unchanged; income +R30/t
-        "yield_low_pct": 0.0,
-        "yield_high_pct": 0.0,
-        "income_abs": 30.0,
-        "cost_rules": [
-            # Apply +7.9% ONLY to these two items (NOT to 'Toesig en bestuurshulp'):
-            ("item", "Permanente arbeid", "pct", 7.9),
-            ("item", "Seisoensarbeid en kontrakwerk", "pct", 7.9),
-            # Admin uplift:
-            ("item", "Administrasie", "abs", 1666),
-        ],
-    },
-    "Scenario 3 — Organic + Fairtrade": {
-        "label": "Organic + Fairtrade",
-        # Organic yield change + Fairtrade income uplift
-        "diff_multiplier": 1.41,
-        "yield_high_pct": 0.0,
-        "income_abs": 30.0,  # +R30/t
-
-        "cost_rules": [
-            # Organic base adjustments
-            ("item", "Saad, organiese bemesting en materiaal", "set", 13349),
-            ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", 1053),
-            ("category", "Meganisasie", "abs", 110),
-
-            # Admin = Organic (555) + Fairtrade (1666) = 2221
-            ("item", "Administrasie", "abs", 2221),
-
-            # Fairtrade labour uplift (only these two; NOT 'Toesig en bestuurshulp')
-            ("item", "Permanente arbeid", "pct", 7.9),
-            ("item", "Seisoensarbeid en kontrakwerk", "pct", 7.9),
-            ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
-            ("item", "Onkruiddoder", "set", 0),
-            ("item", "Veevoer en medisyne / Droogmiddels", "set", 0),
-        ],
-    },
-}
+SCENARIOS = build_scenarios(int(year) if year is not None else 2025)
 
 
 def _apply_abs(x, inc):
@@ -447,6 +548,137 @@ def apply_cost_rules(base_df: pd.DataFrame, rules):
                 lambda v: (0.0 if pd.isna(v) else float(v)) * (1.0 + float(val) / 100.0)
             )
     return out
+
+
+def build_year_profile_result(compare_year: int, cfg_key: str) -> dict:
+    """Calculate one comparable industry/scenario position for a historical year."""
+    year_costs = filter_costs_for_year(costs_df, compare_year)
+    year_costs = year_costs[
+        (year_costs["Region"].astype(str).str.strip().str.lower() == region.strip().lower())
+        & (~year_costs["Category"].apply(is_forbidden))
+        & (~year_costs["Item"].apply(is_forbidden))
+    ].copy()
+    base_costs = year_costs[["Category", "Item", "Avg_Cost"]].rename(
+        columns={"Avg_Cost": "Value"}
+    )
+    base_costs["Value"] = pd.to_numeric(base_costs["Value"], errors="coerce").fillna(0.0)
+
+    provision = lookup_industry_provision(costs_df, region, compare_year)
+    industry_cash = float(base_costs["Value"].sum())
+    industry_total = industry_cash + provision
+
+    cfg = build_scenarios(compare_year)[cfg_key]
+    scenario_costs = apply_cost_rules(base_costs, cfg["cost_rules"])
+    scenario_cash = float(pd.to_numeric(scenario_costs["Value"], errors="coerce").fillna(0.0).sum())
+    scenario_total = scenario_cash + provision
+
+    inc_low = lookup_band(
+        income_df, wine_class, grape_variety, region, "Low", "Income_R_per_t", compare_year
+    )
+    inc_high = lookup_band(
+        income_df, wine_class, grape_variety, region, "High", "Income_R_per_t", compare_year
+    )
+    y_low_base = lookup_band(
+        yield_df, wine_class, grape_variety, region, "Low", "Yield_t_per_ha", None
+    )
+    y_high_base = lookup_band(
+        yield_df, wine_class, grape_variety, region, "High", "Yield_t_per_ha", None
+    )
+
+    industry_income_low = (
+        inc_low * y_low_base if inc_low is not None and y_low_base is not None else None
+    )
+    industry_income_high = (
+        inc_high * y_high_base if inc_high is not None and y_high_base is not None else None
+    )
+    industry_net_low = (
+        industry_income_low - industry_total if industry_income_low is not None else None
+    )
+    industry_net_high = (
+        industry_income_high - industry_total if industry_income_high is not None else None
+    )
+
+    scenario_income_low_rt = _apply_abs(inc_low, cfg.get("income_abs", 0.0)) if inc_low is not None else None
+    scenario_income_high_rt = _apply_abs(inc_high, cfg.get("income_abs", 0.0)) if inc_high is not None else None
+
+    scenario_yield_low = None
+    scenario_yield_high = None
+    if y_low_base is not None and y_high_base is not None:
+        if cfg.get("diff_multiplier") is not None:
+            difference = float(y_high_base) - float(y_low_base)
+            scenario_yield_high = float(y_high_base)
+            scenario_yield_low = float(y_high_base) - difference * float(cfg["diff_multiplier"])
+        else:
+            scenario_yield_low = float(y_low_base) * (
+                1.0 + float(cfg.get("yield_low_pct", 0.0)) / 100.0
+            )
+            scenario_yield_high = float(y_high_base) * (
+                1.0 + float(cfg.get("yield_high_pct", 0.0)) / 100.0
+            )
+
+    scenario_income_low = (
+        scenario_income_low_rt * scenario_yield_low
+        if scenario_income_low_rt is not None and scenario_yield_low is not None
+        else None
+    )
+    scenario_income_high = (
+        scenario_income_high_rt * scenario_yield_high
+        if scenario_income_high_rt is not None and scenario_yield_high is not None
+        else None
+    )
+    scenario_net_low = (
+        scenario_income_low - scenario_total if scenario_income_low is not None else None
+    )
+    scenario_net_high = (
+        scenario_income_high - scenario_total if scenario_income_high is not None else None
+    )
+
+    return {
+        "year": compare_year,
+        "industry_cash": industry_cash,
+        "industry_provision": provision,
+        "industry_total": industry_total,
+        "scenario_cash": scenario_cash,
+        "scenario_total": scenario_total,
+        "income_low_rt": inc_low,
+        "income_high_rt": inc_high,
+        "industry_net_low": industry_net_low,
+        "industry_net_high": industry_net_high,
+        "scenario_net_low": scenario_net_low,
+        "scenario_net_high": scenario_net_high,
+    }
+
+
+def historical_cost_change_frame() -> pd.DataFrame:
+    """Return comparable regional line-item changes between 2024 and 2025."""
+    frames = []
+    for compare_year in [2024, 2025]:
+        sub = filter_costs_for_year(costs_df, compare_year)
+        sub = sub[
+            (sub["Region"].astype(str).str.strip().str.lower() == region.strip().lower())
+            & (~sub["Category"].apply(is_forbidden))
+            & (~sub["Item"].apply(is_forbidden))
+        ][["Category", "Item", "Avg_Cost"]].copy()
+        sub = sub.rename(columns={"Avg_Cost": str(compare_year)})
+        frames.append(sub)
+
+    if len(frames) != 2:
+        return pd.DataFrame()
+
+    comparison = frames[0].merge(frames[1], on=["Category", "Item"], how="outer")
+    comparison["2024"] = pd.to_numeric(comparison["2024"], errors="coerce").fillna(0.0)
+    comparison["2025"] = pd.to_numeric(comparison["2025"], errors="coerce").fillna(0.0)
+    comparison["Change (R/ha)"] = comparison["2025"] - comparison["2024"]
+    comparison["Change (%)"] = comparison.apply(
+        lambda row: (
+            (row["Change (R/ha)"] / row["2024"]) * 100.0
+            if abs(float(row["2024"])) > 1e-9
+            else (0.0 if abs(float(row["2025"])) <= 1e-9 else None)
+        ),
+        axis=1,
+    )
+    comparison["__abs_change"] = comparison["Change (R/ha)"].abs()
+    return comparison.sort_values("__abs_change", ascending=False).drop(columns="__abs_change")
 
 
 def build_scenario(cfg_key: str):
@@ -521,11 +753,11 @@ SC = build_scenario(scenario_key)
 SC_LABEL = SC["label"]
 
 # -----------------------
-# Share Phase 1 current/base inputs with Phase 2
+# Share Phase 1 current/base inputs with Phases 2 and 3
 # -----------------------
 # In the multipage app, Streamlit keeps st.session_state while the user moves
-# between pages. This block therefore lets Phase 2 use the current Phase 1
-# selections and farmer inputs as the base year for the 2030 forecast.
+# between pages. Phase 2 uses these values as the forecast base year, while
+# Phase 3 uses the unchanged current-year position for its cost scenarios.
 st.session_state["phase1_current_base"] = {
     "wine_class": wine_class,
     "grape_variety": grape_variety,
@@ -535,7 +767,14 @@ st.session_state["phase1_current_base"] = {
     "scenario_label": SC_LABEL,
     "farmer_income_rt": float(gross_income_current),
     "farmer_yield": float(yield_current),
+    "industry_yield_low": float(yield_low) if yield_low is not None else None,
+    "industry_yield_high": float(yield_high) if yield_high is not None else None,
+    "industry_income_rt_low": float(income_low) if income_low is not None else None,
+    "industry_income_rt_high": float(income_high) if income_high is not None else None,
     "provision_for_renewal": float(provision_for_renewal),
+    "farmer_total_cost": float(total_expenditure_user),
+    "farmer_revenue_rha": float(income_current_rha),
+    "farmer_nfi_rha": float(net_current),
     "farmer_costs": aligned[["Category", "Item", "Cost"]].to_dict("records"),
     "last_updated": datetime.now().isoformat(timespec="seconds"),
 }
@@ -933,6 +1172,128 @@ def build_html(table_long, label_short):
 
 
 st.iframe(build_html(table, SC_LABEL), height=740, width="stretch")
+
+with st.expander("Historical comparison — 2024 to 2025", expanded=False):
+    st.caption(
+        "This additional view compares the same region, cultivar and selected sustainability "
+        "scenario across the two benchmark years. It does not replace the detailed selected-year view above."
+    )
+    available_years = set(
+        pd.to_numeric(income_df.get("YEAR", pd.Series(dtype=float)), errors="coerce")
+        .dropna()
+        .astype(int)
+        .tolist()
+    )
+    cost_years = set(
+        pd.to_numeric(costs_df.get("Year", pd.Series(dtype=float)), errors="coerce")
+        .dropna()
+        .astype(int)
+        .tolist()
+    )
+
+    if {2024, 2025}.issubset(available_years) and {2024, 2025}.issubset(cost_years):
+        result_2024 = build_year_profile_result(2024, scenario_key)
+        result_2025 = build_year_profile_result(2025, scenario_key)
+
+        def _change_pct(old_value: float, new_value: float) -> float | None:
+            return ((new_value / old_value) - 1.0) * 100.0 if abs(old_value) > 1e-9 else None
+
+        industry_cash_change = _change_pct(
+            result_2024["industry_cash"], result_2025["industry_cash"]
+        )
+        scenario_total_change = _change_pct(
+            result_2024["scenario_total"], result_2025["scenario_total"]
+        )
+
+        metric_cols = st.columns(3)
+        metric_cols[0].metric(
+            "Industry cash costs",
+            money(result_2025["industry_cash"]),
+            delta=(
+                f"{industry_cash_change:+.1f}% vs 2024"
+                if industry_cash_change is not None else "No 2024 base"
+            ),
+        )
+        metric_cols[1].metric(
+            f"{SC_LABEL} total expenditure",
+            money(result_2025["scenario_total"]),
+            delta=(
+                f"{scenario_total_change:+.1f}% vs 2024"
+                if scenario_total_change is not None else "No 2024 base"
+            ),
+        )
+        metric_cols[2].metric(
+            "2025 provision for renewal",
+            money(result_2025["industry_provision"]),
+            delta=money(
+                result_2025["industry_provision"] - result_2024["industry_provision"]
+            ),
+        )
+
+        historical_summary = pd.DataFrame(
+            [
+                {
+                    "Indicator": "Industry income range (R/t)",
+                    "2024": f"{money(result_2024['income_low_rt'])} / {money(result_2024['income_high_rt'])}",
+                    "2025": f"{money(result_2025['income_low_rt'])} / {money(result_2025['income_high_rt'])}",
+                },
+                {
+                    "Indicator": "Industry total expenditure (R/ha)",
+                    "2024": money(result_2024["industry_total"]),
+                    "2025": money(result_2025["industry_total"]),
+                },
+                {
+                    "Indicator": f"{SC_LABEL} total expenditure (R/ha)",
+                    "2024": money(result_2024["scenario_total"]),
+                    "2025": money(result_2025["scenario_total"]),
+                },
+                {
+                    "Indicator": "Industry NFI range (R/ha)",
+                    "2024": f"{money(result_2024['industry_net_low'])} / {money(result_2024['industry_net_high'])}",
+                    "2025": f"{money(result_2025['industry_net_low'])} / {money(result_2025['industry_net_high'])}",
+                },
+                {
+                    "Indicator": f"{SC_LABEL} NFI range (R/ha)",
+                    "2024": f"{money(result_2024['scenario_net_low'])} / {money(result_2024['scenario_net_high'])}",
+                    "2025": f"{money(result_2025['scenario_net_low'])} / {money(result_2025['scenario_net_high'])}",
+                },
+            ]
+        )
+        st.dataframe(historical_summary, hide_index=True, width="stretch")
+
+        cost_changes = historical_cost_change_frame()
+        if not cost_changes.empty:
+            largest = cost_changes.iloc[0]
+            movement_text = (
+                f"For {region}, total industry cash costs changed by "
+                f"{industry_cash_change:+.1f}% from 2024 to 2025. "
+                f"The largest absolute line-item movement was {largest['Item']}: "
+                f"{money(largest['2024'])} to {money(largest['2025'])} "
+                f"({money(largest['Change (R/ha)'])} per hectare)."
+                if industry_cash_change is not None else
+                "The 2024 and 2025 line-item values are shown below."
+            )
+            if industry_cash_change is not None and abs(industry_cash_change) >= 20:
+                movement_text += (
+                    " This is a large year-on-year movement and should be interpreted "
+                    "with the source-year context rather than as a normal long-run trend."
+                )
+            st.info(movement_text)
+
+            st.markdown("#### Detailed industry cost changes")
+            st.dataframe(
+                cost_changes,
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "2024": st.column_config.NumberColumn(format="R %.2f"),
+                    "2025": st.column_config.NumberColumn(format="R %.2f"),
+                    "Change (R/ha)": st.column_config.NumberColumn(format="R %.2f"),
+                    "Change (%)": st.column_config.NumberColumn(format="%.2f%%"),
+                },
+            )
+    else:
+        st.info("Both 2024 and 2025 income and cost records are required for this comparison.")
 
 
 # ---------- Helper: build a safe filename ----------
@@ -1675,5 +2036,4 @@ else:
 # Release Matplotlib resources after Streamlit and the exports have consumed them.
 plt.close(fig)
 plt.close(fig_bar)
-
 

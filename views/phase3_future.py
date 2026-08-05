@@ -104,20 +104,37 @@ def load_cost_change_benchmarks() -> pd.DataFrame:
 
 @st.cache_data
 def load_industry_cost_benchmarks() -> pd.DataFrame:
-    path = resolve_data_file("costs.csv", required=False)
+    path = resolve_data_file(
+        "costs_2024_2025_with_blended_growth_percent.csv",
+        required=False,
+    )
     if path is None:
-        return pd.DataFrame(columns=["Region", "Category", "Item", "Industry cost (R/ha)"])
+        path = resolve_data_file("costs.csv", required=False)
+    if path is None:
+        return pd.DataFrame(
+            columns=["Year", "Region", "Category", "Item", "Industry cost (R/ha)"]
+        )
+
     frame = pd.read_csv(path, encoding="utf-8-sig")
     frame.columns = [str(column).strip() for column in frame.columns]
     if "Avg_Cost" in frame.columns:
         frame = frame.rename(columns={"Avg_Cost": "Industry cost (R/ha)"})
+    if "YEAR" in frame.columns and "Year" not in frame.columns:
+        frame = frame.rename(columns={"YEAR": "Year"})
+
     required = {"Region", "Category", "Item", "Industry cost (R/ha)"}
     if not required.issubset(frame.columns):
-        return pd.DataFrame(columns=list(required))
+        return pd.DataFrame(
+            columns=["Year", "Region", "Category", "Item", "Industry cost (R/ha)"]
+        )
+
+    if "Year" not in frame.columns:
+        frame["Year"] = pd.NA
+    frame["Year"] = pd.to_numeric(frame["Year"], errors="coerce").astype("Int64")
     frame["Industry cost (R/ha)"] = pd.to_numeric(
         frame["Industry cost (R/ha)"], errors="coerce"
     ).fillna(0.0)
-    return frame[["Region", "Category", "Item", "Industry cost (R/ha)"]].copy()
+    return frame[["Year", "Region", "Category", "Item", "Industry cost (R/ha)"]].copy()
 
 
 def lookup_industry_yield(base: dict[str, Any]) -> tuple[float | None, float | None]:
@@ -199,11 +216,42 @@ def format_range(low: Any, high: Any, *, monetary: bool = False, decimals: int =
         return "—"
 
 
-def lookup_industry_costs(region: str) -> pd.DataFrame:
+def lookup_industry_costs(region: str, selected_year: int | None) -> pd.DataFrame:
     frame = load_industry_cost_benchmarks()
     if frame.empty:
         return frame
-    return frame[frame["Region"].map(normalise_text) == normalise_text(region)].copy()
+
+    sub = frame[frame["Region"].map(normalise_text) == normalise_text(region)].copy()
+    if selected_year is not None and "Year" in sub.columns and sub["Year"].notna().any():
+        sub = sub[pd.to_numeric(sub["Year"], errors="coerce") == int(selected_year)].copy()
+
+    excluded = {"provision for renewal", "total expenditure", "totale kontant uitgawes"}
+    sub = sub[
+        ~sub["Category"].map(normalise_text).isin(excluded)
+        & ~sub["Item"].map(normalise_text).isin(excluded)
+    ].copy()
+    return sub
+
+
+def lookup_industry_provision(
+    region: str,
+    selected_year: int | None,
+    default: float = 20125.0,
+) -> float:
+    frame = load_industry_cost_benchmarks()
+    if frame.empty:
+        return float(default)
+
+    sub = frame[frame["Region"].map(normalise_text) == normalise_text(region)].copy()
+    if selected_year is not None and "Year" in sub.columns and sub["Year"].notna().any():
+        sub = sub[pd.to_numeric(sub["Year"], errors="coerce") == int(selected_year)].copy()
+
+    mask = (
+        sub["Category"].map(normalise_text).eq("provision for renewal")
+        | sub["Item"].map(normalise_text).eq("provision for renewal")
+    )
+    values = pd.to_numeric(sub.loc[mask, "Industry cost (R/ha)"], errors="coerce").dropna()
+    return float(values.iloc[0]) if not values.empty else float(default)
 
 
 def figure_to_png_bytes(figure) -> bytes:
@@ -641,7 +689,7 @@ st.markdown(
 st.title("Phase 3 — Cost & Yield Scenarios")
 st.markdown(
     "<p style='color:#6b7280; margin-top:-10px;'><em>"
-    "Bounded scenario analysis using the farmer’s current 2025 Phase 1 position."
+    "Bounded scenario analysis using the farmer’s selected Phase 1 benchmark-year position."
     "</em></p>",
     unsafe_allow_html=True,
 )
@@ -751,7 +799,7 @@ for key, adjustment_percent in applied_adjustments.items():
     if regional_change is not None and adjustment_percent > regional_change and adjustment_percent > 0:
         benchmark_warnings.append(
             f"{MODEL_KEY_TO_SPEC[key].label}: {adjustment_percent:.1f}% selected versus "
-            f"a {regional_change:.1f}% 2025 area benchmark change"
+            f"a {regional_change:.1f}% 2024-to-2025 area benchmark change"
         )
 if benchmark_warnings:
     st.warning(
@@ -783,14 +831,22 @@ scenario_text = "; ".join(
     for key, value in applied_adjustments.items()
 )
 
-industry_costs = lookup_industry_costs(str(base.get("region", "")))
+selected_base_year = int(base.get("year")) if base.get("year") is not None else None
+industry_costs = lookup_industry_costs(
+    str(base.get("region", "")),
+    selected_base_year,
+)
+industry_provision = lookup_industry_provision(
+    str(base.get("region", "")),
+    selected_base_year,
+)
 industry_cash_cost = (
     float(industry_costs["Industry cost (R/ha)"].sum())
     if not industry_costs.empty
     else None
 )
 industry_total_cost = (
-    industry_cash_cost + INDUSTRY_PROVISION
+    industry_cash_cost + industry_provision
     if industry_cash_cost is not None
     else None
 )
@@ -820,7 +876,7 @@ industry_nfi_high = (
 )
 
 profile_rows = [
-    ("Year", str(base.get("year") or "2025")),
+    ("Year", str(base.get("year") or "—")),
     ("Wine Class", str(base.get("wine_class", ""))),
     ("Grape Variety", str(base.get("grape_variety", ""))),
     ("Region", str(base.get("region", ""))),
@@ -831,7 +887,7 @@ summary_columns = [
     "Section / Item",
     "Phase 1 Current",
     "Phase 3 Central Scenario",
-    "2025 Industry Comparison",
+    f"{base.get('year') or 'Selected year'} Industry Comparison",
     "Phase 3 Response Range (Lower / Upper)",
 ]
 
@@ -893,7 +949,7 @@ benchmark_summary_rows = [
     ),
     benchmark_row(
         "Provision for renewal (R/ha)", money(base.get("provision_for_renewal", 0.0)),
-        money(base.get("provision_for_renewal", 0.0)), money(INDUSTRY_PROVISION),
+        money(base.get("provision_for_renewal", 0.0)), money(industry_provision),
         format_range(base.get("provision_for_renewal", 0.0), base.get("provision_for_renewal", 0.0), monetary=True),
     ),
     benchmark_row(
@@ -966,7 +1022,7 @@ detail_rows.extend(
         ),
         benchmark_row(
             "Provision for renewal", money(base.get("provision_for_renewal", 0.0)),
-            money(base.get("provision_for_renewal", 0.0)), money(INDUSTRY_PROVISION),
+            money(base.get("provision_for_renewal", 0.0)), money(industry_provision),
             format_range(base.get("provision_for_renewal", 0.0), base.get("provision_for_renewal", 0.0), monetary=True),
             "row-total",
         ),
@@ -1060,13 +1116,13 @@ with tab_a:
         )
     elif bool(summary["Yield cap applied"].fillna(False).any()):
         st.info(
-            "At least one response reached the available 2025 yield benchmark. Further cost increases can still affect costs, "
+            "At least one response reached the available yield benchmark. Further cost increases can still affect costs, "
             f"but the calculated yield is limited to {effective_yield_cap:.2f} t/ha."
         )
 
     st.markdown("### Income, Costs and Summary")
     st.caption(
-        "Phase 1 current values, the central combined scenario, regional 2025 benchmarks and the lower-to-upper response range are shown together."
+        f"Phase 1 current values, the central combined scenario, regional {base.get('year') or 'selected-year'} benchmarks and the lower-to-upper response range are shown together."
     )
     st.html(build_benchmark_table_html(profile_rows, benchmark_summary_rows))
 
@@ -1121,7 +1177,7 @@ with tab_a:
         [{key: value for key, value in row.items() if key != "_class"} for row in detail_rows]
     )
     safe_region = str(base.get("region", "Region")).replace(" ", "_").replace("/", "-")
-    report_base_name = f"Phase3A_Scenario_Benchmark_{safe_region}_{base.get('year') or 2025}"
+    report_base_name = f"Phase3A_Scenario_Benchmark_{safe_region}_{base.get('year') or 'NA'}"
     excel_bytes = phase3_excel_bytes(
         summary_export, detail_export, profile_rows, benchmark_range_figure, benchmark_summary_figure
     )

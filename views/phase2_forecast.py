@@ -60,6 +60,11 @@ FORBIDDEN_LABELS = {
     "total",
     "totale",
     "grand total",
+    "provision for renewal",
+    "total expenditure",
+    "totale kontant uitgawes",
+    "net farm income (r/ha)",
+    "income (r/ha)",
 }
 
 
@@ -129,8 +134,15 @@ def _read_csv(name: str) -> pd.DataFrame:
     if name == "income.csv":
         for folder in [DATA_DIR, PROJECT_ROOT, Path.cwd(), Path.cwd() / "data"]:
             if folder.exists():
+                candidates.extend(sorted(folder.glob("income_2024_2025_with_average_annual_growth_percent.csv")))
                 candidates.extend(sorted(folder.glob("income*growth*.csv")))
                 candidates.extend(sorted(folder.glob("income_2024_2025*.csv")))
+
+    if name == "costs.csv":
+        for folder in [DATA_DIR, PROJECT_ROOT, Path.cwd(), Path.cwd() / "data"]:
+            if folder.exists():
+                candidates.extend(sorted(folder.glob("costs_2024_2025_with_blended_growth_percent.csv")))
+                candidates.extend(sorted(folder.glob("costs_2024_2025*.csv")))
 
     candidates.extend([
         DATA_DIR / name,
@@ -236,6 +248,7 @@ def yield_cols(df: pd.DataFrame) -> DataColumns:
 def cost_cols(df: pd.DataFrame) -> DataColumns:
     return DataColumns(
         region=_find_col(df, ["Region", "Area"]),
+        year=_find_col(df, ["Year", "YEAR"]),
         category=_find_col(df, ["Category", "Cost Category", "Group"]),
         item=_find_col(df, ["Item", "Description", "Cost Item"]),
         avg_cost=_find_col(df, ["Avg_Cost", "Avg Cost", "Average Cost", "Avg", "Cost", "Value"]),
@@ -404,13 +417,20 @@ def lookup_income_growth_percent(
     return None
 
 
-def prepare_costs(costs_df: pd.DataFrame, cols: DataColumns, region: str) -> pd.DataFrame:
+def prepare_costs(
+    costs_df: pd.DataFrame,
+    cols: DataColumns,
+    region: str,
+    selected_year: int | None = None,
+) -> pd.DataFrame:
     if costs_df.empty or not all([cols.region, cols.category, cols.item, cols.avg_cost]):
         return pd.DataFrame(columns=["Category", "Item", "Avg"])
 
     sub = costs_df[
         costs_df[cols.region].astype(str).str.strip().str.lower() == region.strip().lower()
     ].copy()
+    if selected_year is not None and cols.year and cols.year in sub.columns:
+        sub = sub[pd.to_numeric(sub[cols.year], errors="coerce") == int(selected_year)].copy()
 
     sub = sub.rename(
         columns={
@@ -436,54 +456,105 @@ def prepare_costs(costs_df: pd.DataFrame, cols: DataColumns, region: str) -> pd.
     return sub.reset_index(drop=True)
 
 
+def lookup_industry_provision(
+    costs_df: pd.DataFrame,
+    cols: DataColumns,
+    region: str,
+    selected_year: int | None,
+    default: float = 20125.0,
+) -> float:
+    """Read the regional provision-for-renewal value for the selected year."""
+    if costs_df.empty or not all([cols.region, cols.category, cols.item, cols.avg_cost]):
+        return float(default)
+
+    sub = costs_df[
+        costs_df[cols.region].astype(str).str.strip().str.lower() == region.strip().lower()
+    ].copy()
+    if selected_year is not None and cols.year and cols.year in sub.columns:
+        sub = sub[pd.to_numeric(sub[cols.year], errors="coerce") == int(selected_year)].copy()
+
+    category_text = sub[cols.category].astype(str).str.strip().str.lower()
+    item_text = sub[cols.item].astype(str).str.strip().str.lower()
+    mask = category_text.eq("provision for renewal") | item_text.eq("provision for renewal")
+    values = pd.to_numeric(sub.loc[mask, cols.avg_cost], errors="coerce").dropna()
+    return float(values.iloc[0]) if not values.empty else float(default)
+
+
 # -----------------------
 # Scenario assumptions
 # -----------------------
 
-SCENARIOS: dict[str, dict[str, Any]] = {
-    "Scenario 1 — Organic": {
-        "label": "Organic",
-        "diff_multiplier": 1.41,
-        "yield_high_pct": 0.0,
-        "income_abs": 0.0,
-        "cost_rules": [
-            ("item", "Saad, organiese bemesting en materiaal", "set", 13349),
-            ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", 1053),
-            ("category", "Meganisasie", "abs", 110),
-            ("item", "Administrasie", "abs", 555),
-            ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
-            ("item", "Onkruiddoder", "set", 0),
-        ],
-    },
-    "Scenario 2 — Fairtrade": {
-        "label": "Fairtrade",
-        "yield_low_pct": 0.0,
-        "yield_high_pct": 0.0,
-        "income_abs": 30.0,
-        "cost_rules": [
-            ("item", "Permanente arbeid", "pct", 7.9),
-            ("item", "Seisoensarbeid en kontrakwerk", "pct", 7.9),
-            ("item", "Administrasie", "abs", 1666),
-        ],
-    },
-    "Scenario 3 — Organic + Fairtrade": {
-        "label": "Organic + Fairtrade",
-        "diff_multiplier": 1.41,
-        "yield_high_pct": 0.0,
-        "income_abs": 30.0,
-        "cost_rules": [
-            ("item", "Saad, organiese bemesting en materiaal", "set", 13349),
-            ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", 1053),
-            ("category", "Meganisasie", "abs", 110),
-            ("item", "Administrasie", "abs", 2221),
-            ("item", "Permanente arbeid", "pct", 7.9),
-            ("item", "Seisoensarbeid en kontrakwerk", "pct", 7.9),
-            ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
-            ("item", "Onkruiddoder", "set", 0),
-            ("item", "Veevoer en medisyne / Droogmiddels", "set", 0),
-        ],
-    },
-}
+def build_scenarios(selected_year: int | None) -> dict[str, dict[str, Any]]:
+    """Return the sustainability assumptions belonging to the forecast base year."""
+    year_key = 2024 if int(selected_year or 2025) <= 2024 else 2025
+    assumptions = {
+        2024: {
+            "organic_material": 13349,
+            "crop_protection": 1053,
+            "fuel": 110,
+            "organic_admin": 555,
+            "fairtrade_labour_pct": 7.9,
+            "fairtrade_admin": 1666,
+            "combined_admin": 2221,
+        },
+        2025: {
+            "organic_material": 16081,
+            "crop_protection": 1053,
+            "fuel": 150,
+            "organic_admin": 610,
+            "fairtrade_labour_pct": 34.4,
+            "fairtrade_admin": 1830,
+            "combined_admin": 2440,
+        },
+    }[year_key]
+
+    return {
+        "Scenario 1 — Organic": {
+            "label": "Organic",
+            "diff_multiplier": 1.41,
+            "yield_high_pct": 0.0,
+            "income_abs": 0.0,
+            "cost_rules": [
+                ("item", "Saad, organiese bemesting en materiaal", "set", assumptions["organic_material"]),
+                ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", assumptions["crop_protection"]),
+                ("item", "Brandstof (petrol en diesel) en smeermiddels", "abs", assumptions["fuel"]),
+                ("item", "Administrasie", "abs", assumptions["organic_admin"]),
+                ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
+                ("item", "Onkruiddoder", "set", 0),
+            ],
+        },
+        "Scenario 2 — Fairtrade": {
+            "label": "Fairtrade",
+            "yield_low_pct": 0.0,
+            "yield_high_pct": 0.0,
+            "income_abs": 30.0,
+            "cost_rules": [
+                ("item", "Permanente arbeid", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Seisoensarbeid en kontrakwerk", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Administrasie", "abs", assumptions["fairtrade_admin"]),
+            ],
+        },
+        "Scenario 3 — Organic + Fairtrade": {
+            "label": "Organic + Fairtrade",
+            "diff_multiplier": 1.41,
+            "yield_high_pct": 0.0,
+            "income_abs": 30.0,
+            "cost_rules": [
+                ("item", "Saad, organiese bemesting en materiaal", "set", assumptions["organic_material"]),
+                ("item", "Gewasbeskerming (swam- en insekbeheer)", "set", assumptions["crop_protection"]),
+                ("item", "Brandstof (petrol en diesel) en smeermiddels", "abs", assumptions["fuel"]),
+                ("item", "Administrasie", "abs", assumptions["combined_admin"]),
+                ("item", "Permanente arbeid", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Seisoensarbeid en kontrakwerk", "pct", assumptions["fairtrade_labour_pct"]),
+                ("item", "Kunsmis, blaar- en grondontledings", "set", 0),
+                ("item", "Onkruiddoder", "set", 0),
+                ("item", "Veevoer en medisyne / Droogmiddels", "set", 0),
+            ],
+        },
+    }
+
+
+SCENARIOS = build_scenarios(2025)
 
 
 def apply_cost_rules(base_df: pd.DataFrame, rules: list[tuple[str, str, str, float]]) -> pd.DataFrame:
@@ -561,7 +632,12 @@ def scenario_values(
 # HTML table styling
 # -----------------------
 
-def build_comparison_html(profile_rows: list[tuple[str, str]], rows: list[dict[str, str]]) -> str:
+def build_comparison_html(
+    profile_rows: list[tuple[str, str]],
+    rows: list[dict[str, str]],
+    base_year: int,
+    target_year: int,
+) -> str:
     profile_html = "".join(
         f"<tr><th>{label}</th><td>{value}</td></tr>" for label, value in profile_rows
     )
@@ -664,10 +740,10 @@ def build_comparison_html(profile_rows: list[tuple[str, str]], rows: list[dict[s
         <thead>
           <tr>
             <th>Section / Item</th>
-            <th>2025 / Current</th>
-            <th>2030 Farmer Forecast</th>
-            <th>2030 Industry Range</th>
-            <th>2030 Scenario Range</th>
+            <th>{base_year} / Current</th>
+            <th>{target_year} Farmer Forecast</th>
+            <th>{target_year} Industry Range</th>
+            <th>{target_year} Scenario Range</th>
           </tr>
         </thead>
         <tbody>
@@ -675,14 +751,19 @@ def build_comparison_html(profile_rows: list[tuple[str, str]], rows: list[dict[s
         </tbody>
       </table>
       <div class="phase2-note">
-        Industry and scenario columns use Low / High benchmark ranges where available. The forecast uses Phase 1 farmer values as the 2025 base.
+        Industry and scenario columns use Low / High benchmark ranges where available. The forecast uses the selected {base_year} base and shows the {target_year} position.
       </div>
     </div>
     """
 
 
-def build_cost_detail_html(profile_rows: list[tuple[str, str]], rows: list[dict[str, str]]) -> str:
-    """Build a Phase-1-style detailed cost table for the 2030 forecast view."""
+def build_cost_detail_html(
+    profile_rows: list[tuple[str, str]],
+    rows: list[dict[str, str]],
+    base_year: int,
+    target_year: int,
+) -> str:
+    """Build a Phase-1-style detailed cost table for the selected forecast view."""
     profile_html = "".join(
         f"<tr><th>{escape(str(label))}</th><td>{escape(str(value))}</td></tr>" for label, value in profile_rows
     )
@@ -803,17 +884,17 @@ def build_cost_detail_html(profile_rows: list[tuple[str, str]], rows: list[dict[
           <thead>
             <tr>
               <th>Section / Item</th>
-              <th>2025 Farmer Current</th>
-              <th>2030 Farmer Forecast</th>
-              <th>2030 Industry Forecast</th>
-              <th>2030 Scenario Forecast</th>
+              <th>{base_year} Farmer Current</th>
+              <th>{target_year} Farmer Forecast</th>
+              <th>{target_year} Industry Forecast</th>
+              <th>{target_year} Scenario Forecast</th>
             </tr>
           </thead>
           <tbody>{''.join(body)}</tbody>
         </table>
       </div>
       <div class="phase2-detail-note">
-        Detail view uses the Phase 1 farmer values as the 2025 base and applies the selected forecast assumptions to show the 2030 position.
+        Detail view uses the selected {base_year} base and applies the forecast assumptions to show the {target_year} position.
       </div>
     </div>
     """
@@ -827,6 +908,8 @@ def build_forecast_cost_detail_rows(
     periods: int,
     provision_current: float,
     provision_2030: float,
+    industry_provision_2030: float,
+    scenario_provision_2030: float,
     farmer_net_current: float,
     farmer_net_2030: float,
     industry_net_low_2030: float | None,
@@ -901,16 +984,16 @@ def build_forecast_cost_detail_rows(
                 "Section / Item": "Provision for renewal",
                 "2025 Farmer Current": _fmt_money(provision_current),
                 "2030 Farmer Forecast": _fmt_money(provision_2030),
-                "2030 Industry Forecast": _fmt_money(provision_2030),
-                "2030 Scenario Forecast": _fmt_money(provision_2030),
+                "2030 Industry Forecast": _fmt_money(industry_provision_2030),
+                "2030 Scenario Forecast": _fmt_money(scenario_provision_2030),
                 "_class": "row-total",
             },
             {
                 "Section / Item": "Total Expenditure",
                 "2025 Farmer Current": _fmt_money(farmer_cash_current + provision_current),
                 "2030 Farmer Forecast": _fmt_money(farmer_cash_2030 + provision_2030),
-                "2030 Industry Forecast": _fmt_money(industry_cash_2030 + provision_2030),
-                "2030 Scenario Forecast": _fmt_money(scenario_cash_2030 + provision_2030),
+                "2030 Industry Forecast": _fmt_money(industry_cash_2030 + industry_provision_2030),
+                "2030 Scenario Forecast": _fmt_money(scenario_cash_2030 + scenario_provision_2030),
                 "_class": "row-total",
             },
             {
@@ -1209,14 +1292,14 @@ with st.expander("Quick Guide", expanded=False):
     st.markdown(
         """
 **Purpose**
-- Compare the **current/base year position** with the **2030 forecast position**.
+- Compare the **selected base-year position** with the **selected forecast-year position**.
 - Keep the forecast layout consistent with the benchmark page.
 - Retain a detailed year-by-year view for users who want the full pathway.
 
 **How to use**
 1. Select the vineyard profile and scenario in the sidebar.
 2. Check the growth assumptions.
-3. Use **Page 2A** for the main farmer-friendly view.
+3. Use **Page 2A** for the main farmer-friendly target-year view.
 4. Use **Page 2B** for the detailed year-by-year forecast.
         """
     )
@@ -1285,7 +1368,7 @@ phase1_cost_lookup = _phase1_cost_lookup()
 with st.sidebar:
     st.header("Forecast Inputs")
     if phase1_base:
-        st.success("Using Phase 1 current values as the base year. You can still adjust the forecast assumptions below.")
+        st.success("Phase 1 values are available. They will be carried forward when the selected base year matches Phase 1.")
     else:
         st.info("Open Phase 1 first if you want this page to use the farmer's current inputs as the base year.")
     st.caption("Defaults are loaded from the benchmark data. Adjust as needed.")
@@ -1357,12 +1440,26 @@ with st.sidebar:
         key="phase2_base_year",
     )
 
+    target_year_options = [yr for yr in range(2030, int(base_year), -1)]
     target_year = st.selectbox(
         "Forecast year",
-        [2030, 2029, 2028, 2027, 2026],
+        target_year_options,
         index=0,
         key="phase2_target_year",
     )
+
+    SCENARIOS = build_scenarios(int(base_year))
+    use_phase1_values = (
+        bool(phase1_base)
+        and phase1_base.get("year") is not None
+        and int(phase1_base.get("year")) == int(base_year)
+    )
+    phase1_cost_lookup = _phase1_cost_lookup() if use_phase1_values else {}
+    if phase1_base and not use_phase1_values:
+        st.info(
+            f"Phase 1 is currently set to {phase1_base.get('year')}. "
+            f"The {base_year} forecast therefore starts from the {base_year} benchmark defaults."
+        )
 
     scenario_options = list(SCENARIOS.keys())
     scenario_key = st.selectbox(
@@ -1389,8 +1486,13 @@ with st.sidebar:
 
     default_income = (income_low + income_high) / 2 if income_low is not None and income_high is not None else 5000.0
     default_yield = (yield_low + yield_high) / 2 if yield_low is not None and yield_high is not None else 24.6
-    default_income = _safe_float(_base_default("farmer_income_rt", default_income), default_income)
-    default_yield = _safe_float(_base_default("farmer_yield", default_yield), default_yield)
+    if use_phase1_values:
+        default_income = _safe_float(_base_default("farmer_income_rt", default_income), default_income)
+        default_yield = _safe_float(_base_default("farmer_yield", default_yield), default_yield)
+
+    industry_provision_current = lookup_industry_provision(
+        costs_df, cc, region, int(base_year)
+    )
 
     farmer_income_rt = st.number_input(
         "Gross Income (R/t)",
@@ -1410,13 +1512,18 @@ with st.sidebar:
         key="phase2_farmer_yield",
     )
 
+    provision_default = (
+        _safe_float(_base_default("provision_for_renewal", industry_provision_current), industry_provision_current)
+        if use_phase1_values
+        else industry_provision_current
+    )
     provision_current = st.number_input(
         "Provision for renewal (R/ha)",
         min_value=0.0,
-        value=float(_safe_float(_base_default("provision_for_renewal", 20125.0), 20125.0)),
+        value=float(provision_default),
         step=100.0,
         format="%.2f",
-        key="phase2_provision",
+        key=f"phase2_provision::{base_year}::{region}",
     )
 
     st.markdown("---")
@@ -1462,7 +1569,7 @@ with st.sidebar:
         key="phase2_provision_growth",
     )
 
-base_costs = prepare_costs(costs_df, cc, region)
+base_costs = prepare_costs(costs_df, cc, region, int(base_year))
 if base_costs.empty:
     st.warning("No cost data found for this selected region. The forecast can still run, but costs will be zero.")
 
@@ -1471,7 +1578,7 @@ with st.sidebar.expander("Farmer Costs", expanded=False):
     st.caption("Loaded from regional average costs. Edit where the farmer differs.")
     farmer_cost_rows = []
     for _, row in base_costs.iterrows():
-        key = f"phase2_cost::{region}::{row['Category']}::{row['Item']}"
+        key = f"phase2_cost::{base_year}::{region}::{row['Category']}::{row['Item']}"
         default_cost = phase1_cost_lookup.get(
             (_clean_text(row["Category"]).lower(), _clean_text(row["Item"]).lower()),
             float(row["Avg"]),
@@ -1496,7 +1603,7 @@ farmer_income_rha_current = float(farmer_income_rt) * float(farmer_yield)
 farmer_net_current = farmer_income_rha_current - farmer_exp_current
 
 industry_cash_current = float(pd.to_numeric(base_costs["Avg"], errors="coerce").fillna(0.0).sum())
-industry_exp_current = industry_cash_current + float(provision_current)
+industry_exp_current = industry_cash_current + float(industry_provision_current)
 industry_income_low_rha = income_low * yield_low if income_low is not None and yield_low is not None else None
 industry_income_high_rha = income_high * yield_high if income_high is not None and yield_high is not None else None
 industry_net_low_current = industry_income_low_rha - industry_exp_current if industry_income_low_rha is not None else None
@@ -1507,6 +1614,7 @@ farmer_income_rt_2030 = _pct_change(farmer_income_rt, income_growth, periods)
 farmer_yield_2030 = _pct_change(farmer_yield, yield_growth, periods)
 farmer_cash_2030 = _pct_change(farmer_cash_current, cost_growth, periods)
 provision_2030 = _pct_change(provision_current, provision_growth, periods)
+industry_provision_2030 = _pct_change(industry_provision_current, provision_growth, periods)
 farmer_exp_2030 = farmer_cash_2030 + provision_2030
 farmer_income_rha_2030 = farmer_income_rt_2030 * farmer_yield_2030
 farmer_net_2030 = farmer_income_rha_2030 - farmer_exp_2030
@@ -1516,7 +1624,7 @@ industry_high_rt_2030 = _pct_change(income_high, income_growth, periods) if inco
 industry_yield_low_2030 = _pct_change(yield_low, yield_growth, periods) if yield_low is not None else None
 industry_yield_high_2030 = _pct_change(yield_high, yield_growth, periods) if yield_high is not None else None
 industry_cash_2030 = _pct_change(industry_cash_current, cost_growth, periods)
-industry_exp_2030 = industry_cash_2030 + provision_2030
+industry_exp_2030 = industry_cash_2030 + industry_provision_2030
 industry_income_low_2030 = (
     industry_low_rt_2030 * industry_yield_low_2030
     if industry_low_rt_2030 is not None and industry_yield_low_2030 is not None
@@ -1537,7 +1645,7 @@ scenario_current = scenario_values(
     income_high,
     yield_low,
     yield_high,
-    float(provision_current),
+    float(industry_provision_current),
 )
 scenario_2030 = scenario_values(
     scenario_key,
@@ -1546,7 +1654,7 @@ scenario_2030 = scenario_values(
     industry_high_rt_2030,
     industry_yield_low_2030,
     industry_yield_high_2030,
-    provision_2030,
+    industry_provision_2030,
 )
 
 scenario_label = scenario_2030["label"]
@@ -1596,7 +1704,7 @@ summary_rows = [
         "Section / Item": "Provision for renewal (R/ha)",
         "2025 / Current": _fmt_money(provision_current),
         "2030 Farmer Forecast": _fmt_money(provision_2030),
-        "2030 Industry Range": _fmt_money(provision_2030),
+        "2030 Industry Range": _fmt_money(industry_provision_2030),
         "2030 Scenario Range": _fmt_money(scenario_2030["provision"]),
     },
     {
@@ -1625,6 +1733,8 @@ cost_detail_rows = build_forecast_cost_detail_rows(
     periods=periods,
     provision_current=float(provision_current),
     provision_2030=float(provision_2030),
+    industry_provision_2030=float(industry_provision_2030),
+    scenario_provision_2030=float(scenario_2030["provision"]),
     farmer_net_current=float(farmer_net_current),
     farmer_net_2030=float(farmer_net_2030),
     industry_net_low_2030=industry_net_low_2030,
@@ -1637,39 +1747,39 @@ cost_detail_rows = build_forecast_cost_detail_rows(
 
 tab_a, tab_b = st.tabs(
     [
-        "Page 2A — 2030 Forecast Benchmark",
+        f"Page 2A — {target_year} Forecast Benchmark",
         "Page 2B — Detailed Year-by-Year Forecast",
     ]
 )
 
 with tab_a:
-    st.subheader("Page 2A — 2030 Forecast Benchmark")
+    st.subheader(f"Page 2A — {target_year} Forecast Benchmark")
     st.caption(
-        "Main client-friendly view: Phase 1 current values are carried forward and shown alongside the 2030 forecast position."
+        f"Main client-friendly view: the selected {base_year} base values are carried forward and shown alongside the {target_year} forecast position."
     )
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Current Net Farm Income", _fmt_money(farmer_net_current))
-    c2.metric("2030 Forecast Net Farm Income", _fmt_money(farmer_net_2030), delta=_fmt_money(farmer_net_2030 - farmer_net_current))
+    c2.metric(f"{target_year} Forecast Net Farm Income", _fmt_money(farmer_net_2030), delta=_fmt_money(farmer_net_2030 - farmer_net_current))
     c3.metric("Scenario", scenario_label)
 
     st.iframe(
-        build_comparison_html(profile_rows, summary_rows),
+        build_comparison_html(profile_rows, summary_rows, int(base_year), int(target_year)),
         height=610,
         width="stretch",
     )
 
-    st.markdown("### Detailed Costs and Totals — 2025 Base to 2030 Forecast")
+    st.markdown(f"### Detailed Costs and Totals — {base_year} Base to {target_year} Forecast")
     st.caption(
-        "This mirrors the detailed Phase 1 cost section, but shows the Phase 1 base values next to the projected 2030 values."
+        f"This mirrors the detailed Phase 1 cost section, but shows the {base_year} base values next to the projected {target_year} values."
     )
     st.iframe(
-        build_cost_detail_html(profile_rows, cost_detail_rows),
+        build_cost_detail_html(profile_rows, cost_detail_rows, int(base_year), int(target_year)),
         height=760,
         width="stretch",
     )
 
-    st.markdown("### Regional Competitiveness Map — 2030 Yield and Net Farm Income")
+    st.markdown(f"### Regional Competitiveness Map — {target_year} Yield and Net Farm Income")
     st.caption(
         "This forecast map shows how the farmer's projected yield and profitability compare with the projected regional industry and scenario ranges."
     )
@@ -1720,7 +1830,7 @@ with tab_a:
     with map_centre:
         st.pyplot(forecast_map_fig, width="stretch")
 
-    st.markdown("### Regional Competitiveness Chart — 2030 Yield and Net Farm Income")
+    st.markdown(f"### Regional Competitiveness Chart — {target_year} Yield and Net Farm Income")
     st.caption(
         "This forecast snapshot compares the farmer's projected profitability with projected industry and scenario benchmarks."
     )
@@ -1744,28 +1854,46 @@ with tab_a:
     plt.close(forecast_map_fig)
     plt.close(forecast_bar_fig)
 
-    export_df = pd.DataFrame([{k: v for k, v in row.items() if k != "_class"} for row in summary_rows])
-    detail_export_df = pd.DataFrame([{k: v for k, v in row.items() if k != "_class"} for row in cost_detail_rows])
+    export_df = pd.DataFrame(
+        [{k: v for k, v in row.items() if k != "_class"} for row in summary_rows]
+    ).rename(
+        columns={
+            "2025 / Current": f"{base_year} / Current",
+            "2030 Farmer Forecast": f"{target_year} Farmer Forecast",
+            "2030 Industry Range": f"{target_year} Industry Range",
+            "2030 Scenario Range": f"{target_year} Scenario Range",
+        }
+    )
+    detail_export_df = pd.DataFrame(
+        [{k: v for k, v in row.items() if k != "_class"} for row in cost_detail_rows]
+    ).rename(
+        columns={
+            "2025 Farmer Current": f"{base_year} Farmer Current",
+            "2030 Farmer Forecast": f"{target_year} Farmer Forecast",
+            "2030 Industry Forecast": f"{target_year} Industry Forecast",
+            "2030 Scenario Forecast": f"{target_year} Scenario Forecast",
+        }
+    )
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
         st.download_button(
             "Download Page 2A summary as CSV",
             data=export_df.to_csv(index=False).encode("utf-8"),
-            file_name=f"Phase2A_2030_summary_{region}_{base_year}_{target_year}.csv",
+            file_name=f"Phase2A_{target_year}_summary_{region}_{base_year}_{target_year}.csv",
             mime="text/csv",
         )
     with col_dl2:
         st.download_button(
             "Download Page 2A detailed costs as CSV",
             data=detail_export_df.to_csv(index=False).encode("utf-8"),
-            file_name=f"Phase2A_2030_detailed_costs_{region}_{base_year}_{target_year}.csv",
+            file_name=f"Phase2A_{target_year}_detailed_costs_{region}_{base_year}_{target_year}.csv",
             mime="text/csv",
         )
 
 with tab_b:
     st.subheader("Page 2B — Detailed Year-by-Year Forecast")
     st.caption(
-        "Optional detailed view showing the pathway between the base year and the 2030 forecast."
+        f"Optional detailed view showing the pathway between the {base_year} base and the {target_year} forecast."
     )
 
     years_path = list(range(int(base_year), int(target_year) + 1))
@@ -1787,7 +1915,7 @@ with tab_b:
         i_y_low = _pct_change(yield_low, yield_growth, p) if yield_low is not None else None
         i_y_high = _pct_change(yield_high, yield_growth, p) if yield_high is not None else None
         i_cash = _pct_change(industry_cash_current, cost_growth, p)
-        i_provision = _pct_change(provision_current, provision_growth, p)
+        i_provision = _pct_change(industry_provision_current, provision_growth, p)
         i_exp = i_cash + i_provision
         i_income_low = i_low_rt * i_y_low if i_low_rt is not None and i_y_low is not None else None
         i_income_high = i_high_rt * i_y_high if i_high_rt is not None and i_y_high is not None else None
